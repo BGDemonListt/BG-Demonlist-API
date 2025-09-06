@@ -25,6 +25,7 @@ public class ExceptionServiceImpl implements ExceptionService {
     @Override
     @Async
     public void log(RuntimeException runtimeException, int statusCode) {
+        runtimeException.printStackTrace();
         Exception exception = Exception.mapFromRuntimeException(runtimeException, statusCode);
         exceptionRepository.save(exception);
     }

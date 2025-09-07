@@ -1,10 +1,10 @@
 package com.bgdl.bgdl.security.filters;
 
 import com.bgdl.bgdl.exceptions.user.UserNotFoundException;
-import com.bgdl.bgdl.services.JwtService;
-import com.bgdl.bgdl.services.UserService;
 import com.bgdl.bgdl.models.dto.auth.PublicUserDTO;
 import com.bgdl.bgdl.repositories.TokenRepository;
+import com.bgdl.bgdl.services.JwtService;
+import com.bgdl.bgdl.services.UserService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

@@ -1,18 +1,18 @@
 package com.bgdl.bgdl.services.impl.security;
 
-import com.bgdl.bgdl.exceptions.token.InvalidTokenException;
-import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeRequestUrl;
-import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeTokenRequest;
-import com.google.api.client.http.javanet.NetHttpTransport;
-import com.google.api.client.json.gson.GsonFactory;
 import com.bgdl.bgdl.config.FrontendConfig;
 import com.bgdl.bgdl.enums.Provider;
+import com.bgdl.bgdl.exceptions.token.InvalidTokenException;
 import com.bgdl.bgdl.models.dto.auth.AuthenticationResponse;
 import com.bgdl.bgdl.models.dto.auth.OAuth2UserInfoDTO;
 import com.bgdl.bgdl.models.entity.User;
 import com.bgdl.bgdl.services.OAuth2AuthenticationService;
 import com.bgdl.bgdl.services.TokenService;
 import com.bgdl.bgdl.services.UserService;
+import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeRequestUrl;
+import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeTokenRequest;
+import com.google.api.client.http.javanet.NetHttpTransport;
+import com.google.api.client.json.gson.GsonFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;

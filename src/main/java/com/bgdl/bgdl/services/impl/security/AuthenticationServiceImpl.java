@@ -1,13 +1,12 @@
 package com.bgdl.bgdl.services.impl.security;
 
+import com.bgdl.bgdl.config.rateLimiting.RateLimiterConfigProperties;
+import com.bgdl.bgdl.enums.TokenType;
 import com.bgdl.bgdl.exceptions.email.EmailNotVerified;
 import com.bgdl.bgdl.exceptions.token.ExpiredTokenException;
 import com.bgdl.bgdl.exceptions.token.InvalidTokenException;
 import com.bgdl.bgdl.exceptions.user.UserLoginException;
 import com.bgdl.bgdl.exceptions.user.UserNotFoundException;
-import com.bgdl.bgdl.repositories.VerificationTokenRepository;
-import com.bgdl.bgdl.config.rateLimiting.RateLimiterConfigProperties;
-import com.bgdl.bgdl.enums.TokenType;
 import com.bgdl.bgdl.models.dto.auth.AuthenticationRequest;
 import com.bgdl.bgdl.models.dto.auth.AuthenticationResponse;
 import com.bgdl.bgdl.models.dto.auth.PublicUserDTO;
@@ -16,6 +15,7 @@ import com.bgdl.bgdl.models.entity.Token;
 import com.bgdl.bgdl.models.entity.User;
 import com.bgdl.bgdl.models.entity.VerificationToken;
 import com.bgdl.bgdl.repositories.UserRepository;
+import com.bgdl.bgdl.repositories.VerificationTokenRepository;
 import com.bgdl.bgdl.services.AuthenticationService;
 import com.bgdl.bgdl.services.JwtService;
 import com.bgdl.bgdl.services.TokenService;

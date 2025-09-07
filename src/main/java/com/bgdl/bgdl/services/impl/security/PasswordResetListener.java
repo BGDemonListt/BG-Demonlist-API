@@ -1,9 +1,9 @@
 package com.bgdl.bgdl.services.impl.security;
 
-import com.bgdl.bgdl.services.impl.security.events.OnPasswordResetRequestEvent;
 import com.bgdl.bgdl.config.FrontendConfig;
 import com.bgdl.bgdl.models.entity.User;
 import com.bgdl.bgdl.services.TokenService;
+import com.bgdl.bgdl.services.impl.security.events.OnPasswordResetRequestEvent;
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.context.ApplicationListener;

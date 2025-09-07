@@ -2,7 +2,7 @@ package com.bgdl.bgdl.services.impl;
 
 import com.bgdl.bgdl.exceptions.common.InternalServerErrorException;
 import com.bgdl.bgdl.services.GdRequestService;
-import org.springframework.http.*;
+import org.springframework.http.MediaType;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;

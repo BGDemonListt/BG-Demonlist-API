@@ -2,9 +2,9 @@ package com.bgdl.bgdl.handlers;
 
 import com.bgdl.bgdl.exceptions.common.*;
 import com.bgdl.bgdl.exceptions.user.UserLoginException;
-import com.bgdl.bgdl.services.ExceptionService;
-import com.bgdl.bgdl.exceptions.common.*;
 import com.bgdl.bgdl.models.dto.response.ExceptionResponse;
+import com.bgdl.bgdl.services.ExceptionService;
+import com.bgdl.bgdl.utils.ApiExceptionParser;
 import io.github.resilience4j.ratelimiter.RequestNotPermitted;
 import jakarta.validation.ConstraintViolationException;
 import lombok.AllArgsConstructor;
@@ -15,7 +15,6 @@ import org.springframework.transaction.TransactionException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
-import com.bgdl.bgdl.utils.ApiExceptionParser;
 
 /**
  * Global exception handler for handling various types of exceptions and converting them into standardized API responses.

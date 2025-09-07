@@ -1,6 +1,5 @@
 package com.bgdl.bgdl.services.impl.security;
 
-import com.bgdl.bgdl.repositories.VerificationTokenRepository;
 import com.bgdl.bgdl.enums.TokenType;
 import com.bgdl.bgdl.models.dto.auth.AuthenticationResponse;
 import com.bgdl.bgdl.models.dto.auth.PublicUserDTO;
@@ -8,6 +7,7 @@ import com.bgdl.bgdl.models.entity.Token;
 import com.bgdl.bgdl.models.entity.User;
 import com.bgdl.bgdl.models.entity.VerificationToken;
 import com.bgdl.bgdl.repositories.TokenRepository;
+import com.bgdl.bgdl.repositories.VerificationTokenRepository;
 import com.bgdl.bgdl.services.JwtService;
 import com.bgdl.bgdl.services.TokenService;
 import lombok.RequiredArgsConstructor;

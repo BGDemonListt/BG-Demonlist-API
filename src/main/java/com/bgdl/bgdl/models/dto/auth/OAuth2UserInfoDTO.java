@@ -1,7 +1,7 @@
 package com.bgdl.bgdl.models.dto.auth;
 
-import com.bgdl.bgdl.models.dto.common.BaseDTO;
 import com.bgdl.bgdl.enums.Provider;
+import com.bgdl.bgdl.models.dto.common.BaseDTO;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;

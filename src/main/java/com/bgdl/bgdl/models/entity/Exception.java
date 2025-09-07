@@ -1,8 +1,8 @@
 package com.bgdl.bgdl.models.entity;
 
+import com.bgdl.bgdl.enums.ExceptionSeverity;
 import com.bgdl.bgdl.exceptions.common.ApiException;
 import com.bgdl.bgdl.models.baseEntity.BaseEntity;
-import com.bgdl.bgdl.enums.ExceptionSeverity;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;

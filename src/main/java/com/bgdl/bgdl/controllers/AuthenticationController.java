@@ -49,8 +49,8 @@ public class AuthenticationController {
         AuthenticationResponse authenticationResponse = authenticationService.register(request);
 
         // Email verification eventually
-         User user = modelMapper.map(authenticationResponse.getUser(), User.class);
-         eventPublisher.publishEvent(new OnRegistrationCompleteEvent(user, appBaseUrl));
+        User user = modelMapper.map(authenticationResponse.getUser(), User.class);
+        eventPublisher.publishEvent(new OnRegistrationCompleteEvent(user, appBaseUrl));
 
         return ResponseEntity.ok(authenticationResponse);
     }

@@ -41,7 +41,7 @@ public class LevelSearchResponseDeserializer implements Function<String, List<GD
     }
 
     private GDLevelDTO buildLevel(Map<Integer, String> data, Map<Long, GDCreatorInfoDTO> structuredCreatorsInfo,
-                                     Map<Long, GDSongDTO> structuredSongsInfo) {
+                                  Map<Long, GDSongDTO> structuredSongsInfo) {
         InternalUtils.requireKeys(data, GDIndexes.LEVEL_ID, GDIndexes.LEVEL_NAME, GDIndexes.LEVEL_CREATOR_ID, GDIndexes.LEVEL_DESCRIPTION, GDIndexes.LEVEL_DIFFICULTY,
                 GDIndexes.LEVEL_DEMON_DIFFICULTY, GDIndexes.LEVEL_STARS, GDIndexes.LEVEL_FEATURED_SCORE, GDIndexes.LEVEL_QUALITY_RATING, GDIndexes.LEVEL_DOWNLOADS,
                 GDIndexes.LEVEL_LIKES, GDIndexes.LEVEL_LENGTH, GDIndexes.LEVEL_COIN_COUNT, GDIndexes.LEVEL_COIN_VERIFIED, GDIndexes.LEVEL_VERSION, GDIndexes.LEVEL_GAME_VERSION,

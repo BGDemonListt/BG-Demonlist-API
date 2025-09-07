@@ -1,4 +1,5 @@
 package com.bgdl.bgdl.models.dto.gd;
+
 import com.bgdl.bgdl.enums.MusicLibraryProvider;
 
 import javax.annotation.Nullable;
@@ -72,7 +73,7 @@ public record GDSongDTO(
     }
 
     public static GDSongDTO fromNewgrounds(long id, String title, long artistId, String artist, String size,
-                                        boolean isArtistScouted, @Nullable String downloadUrl) {
+                                           boolean isArtistScouted, @Nullable String downloadUrl) {
         if (isMusicLibraryId(id)) {
             throw new IllegalArgumentException("id must be < 10_000_000 for a Newgrounds song");
         }
@@ -94,8 +95,8 @@ public record GDSongDTO(
     }
 
     public static GDSongDTO fromMusicLibrary(long id, String title, long artistId, String artist, String size,
-                                          @Nullable String youtubeArtist, MusicLibraryProvider musicLibraryProvider,
-                                          List<Long> otherArtistIds) {
+                                             @Nullable String youtubeArtist, MusicLibraryProvider musicLibraryProvider,
+                                             List<Long> otherArtistIds) {
         if (!isMusicLibraryId(id)) {
             throw new IllegalArgumentException("id must be >= 10_000_000 for a Music Library song");
         }

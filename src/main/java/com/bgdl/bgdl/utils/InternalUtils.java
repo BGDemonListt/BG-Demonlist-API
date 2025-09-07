@@ -26,6 +26,7 @@ public class InternalUtils {
     public static String b64Encode(String str) {
         return Base64.getUrlEncoder().encodeToString(str.getBytes());
     }
+
     public static <T> Optional<List<T>> toList(String str, int minSize, Function<String, T> parser, String sep) {
         if (str == null || str.isEmpty()) {
             return Optional.empty();

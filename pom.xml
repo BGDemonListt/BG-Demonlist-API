@@ -8,10 +8,10 @@
 		<version>3.4.1</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
-	<groupId>com.springSecurity</groupId>
-	<artifactId>SpringSecurity</artifactId>
+	<groupId>com.bgdl</groupId>
+	<artifactId>BGDLApi</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>BGDL</name>
+	<name>Bulgarian Demon list API</name>
 	<description>Bulgarian GD demon list</description>
 	<url/>
 	<licenses>

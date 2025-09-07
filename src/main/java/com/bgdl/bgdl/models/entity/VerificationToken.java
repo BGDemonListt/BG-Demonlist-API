@@ -30,7 +30,7 @@ public class VerificationToken {
     private User user;
 
     private Date expiryDate;
-    public LocalDateTime createdAt;
+    private LocalDateTime createdAt;
 
     public VerificationToken(String token, User user) {
         this.token = token;

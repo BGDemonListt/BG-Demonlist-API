@@ -34,7 +34,6 @@ import java.io.IOException;
 @RequiredArgsConstructor
 @Tag(name = "Authentication")
 public class AuthenticationController {
-
     private final AuthenticationService authenticationService;
     private final ApplicationEventPublisher eventPublisher;
     private final FrontendConfig frontendConfig;
@@ -48,7 +47,6 @@ public class AuthenticationController {
     public ResponseEntity<AuthenticationResponse> register(@RequestBody RegisterRequest request) {
         AuthenticationResponse authenticationResponse = authenticationService.register(request);
 
-        // Email verification eventually
         User user = modelMapper.map(authenticationResponse.getUser(), User.class);
         eventPublisher.publishEvent(new OnRegistrationCompleteEvent(user, appBaseUrl));
 

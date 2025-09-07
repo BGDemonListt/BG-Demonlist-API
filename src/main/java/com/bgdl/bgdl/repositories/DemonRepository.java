@@ -9,5 +9,5 @@ import java.util.UUID;
 
 @Repository
 public interface DemonRepository extends JpaRepository<Demon, UUID> {
-    List<Demon> findAllByOrderByPositionAsc();
+    List<Demon> findByDeletedAtIsNullOrderByPositionAsc();
 }

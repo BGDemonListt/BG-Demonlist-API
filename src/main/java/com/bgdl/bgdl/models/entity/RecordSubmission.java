@@ -17,7 +17,7 @@ import lombok.*;
 @Builder
 @Entity
 @Table(name = "records")
-public class Record extends BaseEntity {
+public class RecordSubmission extends BaseEntity {
     @NotNull
     @Min(value = 0, message = "Progress must be between 0-100")
     @Max(value = 100, message = "Progress must be between 0-100")

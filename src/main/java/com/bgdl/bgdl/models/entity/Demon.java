@@ -6,6 +6,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
@@ -20,16 +21,20 @@ import lombok.*;
 @Table(name = "demons")
 public class Demon extends BaseEntity {
     @NotNull
-    @NotBlank(message = "Level ID is required")
-    private String levelId;
+    @NotBlank(message = "Level title is required")
+    private String levelTitle;
+
+    @NotNull
+    @Min(value = 1, message = "Level ID is required")
+    private Long levelId;
 
     @NotNull
     @NotBlank(message = "Creator name is required")
     private String creatorName;
 
     @NotNull
-    @NotBlank(message = "Creator ID is required")
-    private String creatorId;
+    @Min(value = 1, message = "Creator ID is required")
+    private Long creatorId;
 
     @NotNull
     @NotBlank(message = "Description is required")
@@ -44,8 +49,8 @@ public class Demon extends BaseEntity {
     private String musicName;
 
     @NotNull
-    @NotBlank(message = "Music Id is required")
-    private String musicId;
+    @Min(value = 1, message = "Music ID is required")
+    private Long musicId;
 
     @NotNull
     @NotBlank(message = "Music creator is required")
@@ -71,6 +76,7 @@ public class Demon extends BaseEntity {
     }
 
     private int calculatePoints() {
+        // TODO: Add point formula
         return this.position + 1;
     }
 }

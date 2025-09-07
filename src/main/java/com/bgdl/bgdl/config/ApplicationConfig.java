@@ -3,11 +3,11 @@ package com.bgdl.bgdl.config;
 import com.bgdl.bgdl.exceptions.user.UserNotFoundException;
 import com.bgdl.bgdl.models.baseEntity.BaseEntity;
 import com.bgdl.bgdl.models.dto.common.BaseDTO;
+import com.bgdl.bgdl.repositories.UserRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.bgdl.bgdl.repositories.UserRepository;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import lombok.RequiredArgsConstructor;
@@ -60,7 +60,7 @@ public class ApplicationConfig {
                 })
                 .setFieldMatchingEnabled(true)
                 .setFieldAccessLevel(org.modelmapper.config.Configuration.AccessLevel.PRIVATE)
-                .setMatchingStrategy(MatchingStrategies.STANDARD);
+                .setMatchingStrategy(MatchingStrategies.STRICT);
 
         return modelMapper;
     }

@@ -7,13 +7,14 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 public class DemonDTO {
-    private String levelId;
+    private String levelTitle;
+    private long levelId;
     private String creatorName;
-    private String creatorId;
+    private long creatorId;
     private String description;
     private String levelPassword;
     private String musicName;
-    private String musicId;
+    private long musicId;
     private String musicCreatorName;
     private String musicUrl;
     private int position;

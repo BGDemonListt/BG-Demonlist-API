@@ -61,10 +61,13 @@ public class Demon extends BaseEntity {
     private String musicUrl;
 
     @NotNull
+    private int requirement;
+
+    @NotNull
     private int position;
 
     @NotNull
-    private int points;
+    private Double points;
 
     @NotNull
     @Enumerated(EnumType.STRING)
@@ -75,8 +78,8 @@ public class Demon extends BaseEntity {
         this.points = calculatePoints();
     }
 
-    private int calculatePoints() {
+    private Double calculatePoints() {
         // TODO: Add point formula
-        return this.position + 1;
+        return this.position + 1.5;
     }
 }

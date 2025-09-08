@@ -16,7 +16,8 @@ CREATE TABLE demons
     music_name         VARCHAR(255) NOT NULL CHECK (music_name <> ''),
     music_url          VARCHAR(255) NOT NULL CHECK (music_url <> ''),
     position           INT          NOT NULL,
-    points             INT          NOT NULL,
+    points             DOUBLE PRECISION NOT NULL,
+    requirements       INT          NOT NULL,
     CONSTRAINT demons_difficulty_check CHECK (((difficulty)::text = ANY ((ARRAY['EASY':: character varying, 'MEDIUM':: character varying, 'HARD':: character varying, 'INSANE':: character varying, 'EXTREME':: character varying])::text[])
 ) )
 );

@@ -85,7 +85,6 @@ public class UserServiceImpl implements UserService {
 
         if (currentUser.getRole().equals(Role.USER)) {
             userToUpdate.setName(userDTO.getName());
-            userToUpdate.setSurname(userDTO.getSurname());
         } else if (currentUser.getRole().equals(Role.ADMIN)) {
             // It is not null it is "" so don't change it
             if (userDTO.getPassword() == "") {
@@ -140,7 +139,6 @@ public class UserServiceImpl implements UserService {
 
             if (oAuth2User.getProvider().equals(Provider.GOOGLE)) {
                 registerRequest.setName(oAuth2User.getGiven_name());
-                registerRequest.setSurName(oAuth2User.getFamily_name());
             }
 
             user = userRepository.save(buildUser(registerRequest));

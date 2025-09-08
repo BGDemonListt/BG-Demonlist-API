@@ -4,9 +4,7 @@ import com.bgdl.bgdl.enums.Provider;
 import com.bgdl.bgdl.enums.Role;
 import com.bgdl.bgdl.models.baseEntity.BaseEntity;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -26,8 +24,11 @@ public class User extends BaseEntity implements UserDetails {
     @Size(min = 2, message = "The name should be at least 2 symbols!")
     private String name;
 
-    @Size(min = 2, message = "The surname should be at least 2 symbols!")
-    private String surname;
+    @NotNull
+    private Double score = 0.0;
+
+    @NotBlank(message = "Discord ID mustn't be blank")
+    private String discordId;
 
     @Email(message = "Email should be a well-formatted email!")
     @NotNull(message = "The email should not be null!")

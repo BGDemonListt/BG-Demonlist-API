@@ -13,7 +13,7 @@ import java.util.UUID;
 public class PublicUserDTO {
     private UUID id;
     private String name;
-    private String surname;
+    private Double score;
     private String email;
     private Role role;
 }

@@ -6,10 +6,10 @@ import com.bgdl.bgdl.exceptions.common.AccessDeniedException;
 import com.bgdl.bgdl.exceptions.user.UserCreateException;
 import com.bgdl.bgdl.exceptions.user.UserNotFoundException;
 import com.bgdl.bgdl.exceptions.user.UserValidationException;
-import com.bgdl.bgdl.models.dto.auth.AdminUserDTO;
-import com.bgdl.bgdl.models.dto.auth.OAuth2UserInfoDTO;
-import com.bgdl.bgdl.models.dto.auth.PublicUserDTO;
-import com.bgdl.bgdl.models.dto.auth.RegisterRequest;
+import com.bgdl.bgdl.models.response.AdminUserResponse;
+import com.bgdl.bgdl.models.dto.OAuth2UserInfoDTO;
+import com.bgdl.bgdl.models.response.PublicUserResponse;
+import com.bgdl.bgdl.models.request.RegisterRequest;
 import com.bgdl.bgdl.models.entity.User;
 import com.bgdl.bgdl.repositories.UserRepository;
 import com.bgdl.bgdl.services.UserService;
@@ -67,16 +67,16 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<AdminUserDTO> getAllUsers() {
+    public List<AdminUserResponse> getAllUsers() {
         return userRepository
                 .findAll()
                 .stream()
-                .map(x -> modelMapper.map(x, AdminUserDTO.class))
+                .map(x -> modelMapper.map(x, AdminUserResponse.class))
                 .toList();
     }
 
     @Override
-    public AdminUserDTO updateUser(UUID id, AdminUserDTO userDTO, PublicUserDTO currentUser) {
+    public AdminUserResponse updateUser(UUID id, AdminUserResponse userDTO, PublicUserResponse currentUser) {
         User userToUpdate = findById(id);
 
         if (!(userToUpdate.getId().equals(currentUser.getId())) && !currentUser.getRole().equals(Role.ADMIN)) {
@@ -99,12 +99,12 @@ public class UserServiceImpl implements UserService {
         userToUpdate.setId(id);
 
         User updatedUser = userRepository.save(userToUpdate);
-        return modelMapper.map(updatedUser, AdminUserDTO.class);
+        return modelMapper.map(updatedUser, AdminUserResponse.class);
     }
 
 
     @Override
-    public void deleteUserById(UUID id, PublicUserDTO currentUser) {
+    public void deleteUserById(UUID id, PublicUserResponse currentUser) {
         User user = findById(id);
 
         if (user.getId().equals(currentUser.getId())) {
@@ -154,9 +154,9 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public AdminUserDTO getByIdAdmin(UUID id) {
+    public AdminUserResponse getByIdAdmin(UUID id) {
         User user = userRepository.findById(id).orElseThrow(UserNotFoundException::new);
-        return modelMapper.map(user, AdminUserDTO.class);
+        return modelMapper.map(user, AdminUserResponse.class);
     }
 
     private User buildUser(RegisterRequest request) {

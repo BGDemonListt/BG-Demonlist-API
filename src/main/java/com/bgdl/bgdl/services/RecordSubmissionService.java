@@ -1,20 +1,17 @@
 package com.bgdl.bgdl.services;
 
-import com.bgdl.bgdl.models.dto.common.RecordSubmissionDTO;
-import com.bgdl.bgdl.models.dto.request.DemonRequestDTO;
-import com.bgdl.bgdl.models.dto.request.RecordSubmissionRequestDTO;
-import com.bgdl.bgdl.models.dto.response.DemonResponseDTO;
-import com.bgdl.bgdl.models.dto.response.RecordSubmissionResponseDTO;
+import com.bgdl.bgdl.models.request.RecordSubmissionRequest;
+import com.bgdl.bgdl.models.response.RecordSubmissionResponse;
 
 import java.util.List;
 import java.util.UUID;
 
 public interface RecordSubmissionService {
-    List<RecordSubmissionResponseDTO> getAll();
+    List<RecordSubmissionResponse> getAll();
 
-    RecordSubmissionResponseDTO create(RecordSubmissionRequestDTO recordSubmissionRequestDTO);
+    RecordSubmissionResponse create(RecordSubmissionRequest recordSubmissionRequest);
 
-    RecordSubmissionResponseDTO update(RecordSubmissionRequestDTO recordSubmissionRequestDTO);
+    RecordSubmissionResponse update(RecordSubmissionRequest recordSubmissionRequest);
 
     void delete(UUID id);
 }

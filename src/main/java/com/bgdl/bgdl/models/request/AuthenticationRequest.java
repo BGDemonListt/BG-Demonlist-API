@@ -1,4 +1,4 @@
-package com.bgdl.bgdl.models.dto.auth;
+package com.bgdl.bgdl.models.request;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

@@ -1,4 +1,4 @@
-package com.bgdl.bgdl.models.dto.gd;
+package com.bgdl.bgdl.constants;
 
 public class GDIndexes {
     /* Level indexes (in common with Lists) */

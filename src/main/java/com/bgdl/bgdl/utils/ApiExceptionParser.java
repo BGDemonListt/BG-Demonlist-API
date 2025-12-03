@@ -1,7 +1,7 @@
 package com.bgdl.bgdl.utils;
 
 import com.bgdl.bgdl.exceptions.common.ApiException;
-import com.bgdl.bgdl.models.dto.response.ExceptionResponse;
+import com.bgdl.bgdl.models.response.ExceptionResponse;
 
 import java.time.LocalDateTime;
 

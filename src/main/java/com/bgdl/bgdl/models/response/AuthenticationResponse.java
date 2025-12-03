@@ -1,4 +1,4 @@
-package com.bgdl.bgdl.models.dto.auth;
+package com.bgdl.bgdl.models.response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;
@@ -15,5 +15,5 @@ public class AuthenticationResponse implements Serializable {
     private String refreshToken;
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    private PublicUserDTO user;
+    private PublicUserResponse user;
 }

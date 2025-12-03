@@ -1,7 +1,7 @@
-package com.bgdl.bgdl.security.filters;
+package com.bgdl.bgdl.handlers.filters;
 
 import com.bgdl.bgdl.exceptions.user.UserNotFoundException;
-import com.bgdl.bgdl.models.dto.auth.PublicUserDTO;
+import com.bgdl.bgdl.models.response.PublicUserResponse;
 import com.bgdl.bgdl.repositories.TokenRepository;
 import com.bgdl.bgdl.services.JwtService;
 import com.bgdl.bgdl.services.UserService;
@@ -111,7 +111,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             }
 
             // Set user details in request attribute
-            request.setAttribute(USER_KEY, modelMapper.map(userDetails, PublicUserDTO.class));
+            request.setAttribute(USER_KEY, modelMapper.map(userDetails, PublicUserResponse.class));
             request.setAttribute(JWT_KEY, jwt);
         }
 

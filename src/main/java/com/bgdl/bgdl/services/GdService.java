@@ -1,7 +1,7 @@
 package com.bgdl.bgdl.services;
 
-import com.bgdl.bgdl.models.dto.gd.GDLevelDTO;
+import com.bgdl.bgdl.models.response.gdApi.GDLevelResponse;
 
 public interface GdService {
-    GDLevelDTO getGDLevelById(String levelId);
+    GDLevelResponse getGDLevelById(String levelId);
 }

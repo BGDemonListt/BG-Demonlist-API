@@ -1,6 +1,6 @@
-package com.bgdl.bgdl.models.dto.request;
+package com.bgdl.bgdl.models.request;
 
-import com.bgdl.bgdl.models.dto.common.DemonDTO;
+import com.bgdl.bgdl.models.dto.DemonDTO;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -8,5 +8,5 @@ import lombok.NoArgsConstructor;
 @EqualsAndHashCode(callSuper = true)
 @Data
 @NoArgsConstructor
-public class DemonRequestDTO extends DemonDTO {
+public class DemonRequest extends DemonDTO {
 }

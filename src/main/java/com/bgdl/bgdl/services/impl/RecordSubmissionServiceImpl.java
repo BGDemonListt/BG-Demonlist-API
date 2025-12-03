@@ -1,9 +1,7 @@
 package com.bgdl.bgdl.services.impl;
 
-import com.bgdl.bgdl.exceptions.demon.DemonNotFoundException;
-import com.bgdl.bgdl.models.dto.request.RecordSubmissionRequestDTO;
-import com.bgdl.bgdl.models.dto.response.DemonResponseDTO;
-import com.bgdl.bgdl.models.dto.response.RecordSubmissionResponseDTO;
+import com.bgdl.bgdl.models.request.RecordSubmissionRequest;
+import com.bgdl.bgdl.models.response.RecordSubmissionResponse;
 import com.bgdl.bgdl.models.entity.Demon;
 import com.bgdl.bgdl.models.entity.RecordSubmission;
 import com.bgdl.bgdl.models.entity.User;
@@ -28,45 +26,45 @@ public class RecordSubmissionServiceImpl implements RecordSubmissionService {
     private final UserService userService;
 
     @Override
-    public List<RecordSubmissionResponseDTO> getAll() {
+    public List<RecordSubmissionResponse> getAll() {
         return recordSubmissionRepository
                 .findAllByDeletedAtIsNull()
                 .stream()
                 .map(
-                        x -> modelMapper.map(x, RecordSubmissionResponseDTO.class)
+                        x -> modelMapper.map(x, RecordSubmissionResponse.class)
                 )
                 .toList();
     }
 
     @Override
-    public RecordSubmissionResponseDTO create(RecordSubmissionRequestDTO recordSubmissionRequestDTO) {
+    public RecordSubmissionResponse create(RecordSubmissionRequest recordSubmissionRequest) {
         boolean isDuplicate = recordSubmissionRepository.findByDeletedAtIsNullAndHolderIdAndDemonId(
-                recordSubmissionRequestDTO.getUserId(),
-                recordSubmissionRequestDTO.getDemonId())
+                recordSubmissionRequest.getUserId(),
+                recordSubmissionRequest.getDemonId())
                 .isPresent();
 
         if (isDuplicate) {
             throw new IllegalArgumentException();
         }
 
-        User user = userService.findById(recordSubmissionRequestDTO.getUserId());
-        Demon demon = demonService.getById(recordSubmissionRequestDTO.getDemonId());
+        User user = userService.findById(recordSubmissionRequest.getUserId());
+        Demon demon = demonService.getById(recordSubmissionRequest.getDemonId());
 
-        RecordSubmission recordSubmission = modelMapper.map(recordSubmissionRequestDTO, RecordSubmission.class);
+        RecordSubmission recordSubmission = modelMapper.map(recordSubmissionRequest, RecordSubmission.class);
         recordSubmission.setId(null);
 //        recordSubmission.setDemon(demon);
 //        recordSubmission.setHolder(user);
 
         try {
             RecordSubmission savedRecordSubmission = recordSubmissionRepository.save(recordSubmission);
-            return modelMapper.map(savedRecordSubmission, RecordSubmissionResponseDTO.class);
+            return modelMapper.map(savedRecordSubmission, RecordSubmissionResponse.class);
         } catch (Exception e) {
             throw new IllegalArgumentException();
         }
     }
 
     @Override
-    public RecordSubmissionResponseDTO update(RecordSubmissionRequestDTO recordSubmissionRequestDTO) {
+    public RecordSubmissionResponse update(RecordSubmissionRequest recordSubmissionRequest) {
         return null;
     }
 

@@ -1,4 +1,4 @@
-package com.bgdl.bgdl.models.dto.auth;
+package com.bgdl.bgdl.models.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class AdminUserDTO extends PublicUserDTO {
+public class AdminUserResponse extends PublicUserResponse {
     private boolean enabled;
     private String password;
     private String discordId;

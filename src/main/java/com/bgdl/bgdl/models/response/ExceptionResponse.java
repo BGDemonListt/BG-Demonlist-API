@@ -1,4 +1,4 @@
-package com.bgdl.bgdl.models.dto.response;
+package com.bgdl.bgdl.models.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

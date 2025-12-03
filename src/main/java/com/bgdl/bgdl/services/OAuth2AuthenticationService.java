@@ -1,6 +1,6 @@
 package com.bgdl.bgdl.services;
 
-import com.bgdl.bgdl.models.dto.auth.AuthenticationResponse;
+import com.bgdl.bgdl.models.response.AuthenticationResponse;
 
 public interface OAuth2AuthenticationService {
 

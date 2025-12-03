@@ -7,10 +7,10 @@ import com.bgdl.bgdl.exceptions.token.ExpiredTokenException;
 import com.bgdl.bgdl.exceptions.token.InvalidTokenException;
 import com.bgdl.bgdl.exceptions.user.UserLoginException;
 import com.bgdl.bgdl.exceptions.user.UserNotFoundException;
-import com.bgdl.bgdl.models.dto.auth.AuthenticationRequest;
-import com.bgdl.bgdl.models.dto.auth.AuthenticationResponse;
-import com.bgdl.bgdl.models.dto.auth.PublicUserDTO;
-import com.bgdl.bgdl.models.dto.auth.RegisterRequest;
+import com.bgdl.bgdl.models.request.AuthenticationRequest;
+import com.bgdl.bgdl.models.response.AuthenticationResponse;
+import com.bgdl.bgdl.models.response.PublicUserResponse;
+import com.bgdl.bgdl.models.request.RegisterRequest;
 import com.bgdl.bgdl.models.entity.Token;
 import com.bgdl.bgdl.models.entity.User;
 import com.bgdl.bgdl.models.entity.VerificationToken;
@@ -192,7 +192,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             refreshTokenString = refreshToken.getToken();
         }
 
-        PublicUserDTO publicUser = modelMapper.map(accessToken.getUser(), PublicUserDTO.class);
+        PublicUserResponse publicUser = modelMapper.map(accessToken.getUser(), PublicUserResponse.class);
 
         return AuthenticationResponse
                 .builder()

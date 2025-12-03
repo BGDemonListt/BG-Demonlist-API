@@ -2,8 +2,8 @@ package com.bgdl.bgdl.services.impl;
 
 import com.bgdl.bgdl.exceptions.demon.DemonCreateException;
 import com.bgdl.bgdl.exceptions.demon.DemonNotFoundException;
-import com.bgdl.bgdl.models.dto.request.DemonRequestDTO;
-import com.bgdl.bgdl.models.dto.response.DemonResponseDTO;
+import com.bgdl.bgdl.models.request.DemonRequest;
+import com.bgdl.bgdl.models.response.DemonResponse;
 import com.bgdl.bgdl.models.entity.Demon;
 import com.bgdl.bgdl.repositories.DemonRepository;
 import com.bgdl.bgdl.services.DemonService;
@@ -25,12 +25,12 @@ public class DemonServiceImpl implements DemonService {
     private final DemonRepository demonRepository;
 
     @Override
-    public List<DemonResponseDTO> getAllDemons() {
+    public List<DemonResponse> getAllDemons() {
         return demonRepository
                 .findAllByDeletedAtIsNullOrderByPositionAsc()
                 .stream()
                 .map(
-                        x -> modelMapper.map(x, DemonResponseDTO.class)
+                        x -> modelMapper.map(x, DemonResponse.class)
                 )
                 .toList();
     }
@@ -41,29 +41,29 @@ public class DemonServiceImpl implements DemonService {
     }
 
     @Override
-    public DemonResponseDTO getDemonByLevelId(long levelId) {
-        return modelMapper.map(getEntityByLevelId(levelId), DemonResponseDTO.class);
+    public DemonResponse getDemonByLevelId(long levelId) {
+        return modelMapper.map(getEntityByLevelId(levelId), DemonResponse.class);
     }
 
     @Override
-    public DemonResponseDTO createDemon(DemonRequestDTO demonRequestDTO) {
-        if (demonRepository.findByDeletedAtIsNullAndLevelId(demonRequestDTO.getLevelId()).isPresent()) {
+    public DemonResponse createDemon(DemonRequest demonRequest) {
+        if (demonRepository.findByDeletedAtIsNullAndLevelId(demonRequest.getLevelId()).isPresent()) {
             throw new DemonCreateException(true);
         }
 
-        Demon demon = modelMapper.map(demonRequestDTO, Demon.class);
+        Demon demon = modelMapper.map(demonRequest, Demon.class);
         demon.setId(null);
 
         try {
             Demon savedDemon = demonRepository.save(demon);
-            return modelMapper.map(savedDemon, DemonResponseDTO.class);
+            return modelMapper.map(savedDemon, DemonResponse.class);
         } catch (Exception e) {
             throw new DemonCreateException(false);
         }
     }
 
     @Override
-    public DemonResponseDTO update(long levelId, DemonRequestDTO demonRequestDTO) {
+    public DemonResponse update(long levelId, DemonRequest demonRequest) {
         Demon demon = getEntityByLevelId(levelId);
         Optional<Demon> potentialDemon = demonRepository.findByDeletedAtIsNullAndLevelIdAndIdNot(levelId, demon.getId());
 
@@ -71,10 +71,10 @@ public class DemonServiceImpl implements DemonService {
             throw new DemonCreateException(true);
         }
 
-        modelMapper.map(demonRequestDTO, demon);
+        modelMapper.map(demonRequest, demon);
 
         Demon updatedDemon = demonRepository.save(demon);
-        return modelMapper.map(updatedDemon, DemonResponseDTO.class);
+        return modelMapper.map(updatedDemon, DemonResponse.class);
     }
 
     @Override

@@ -1,22 +1,22 @@
 package com.bgdl.bgdl.services;
 
-import com.bgdl.bgdl.models.dto.request.DemonRequestDTO;
-import com.bgdl.bgdl.models.dto.response.DemonResponseDTO;
+import com.bgdl.bgdl.models.request.DemonRequest;
+import com.bgdl.bgdl.models.response.DemonResponse;
 import com.bgdl.bgdl.models.entity.Demon;
 
 import java.util.List;
 import java.util.UUID;
 
 public interface DemonService {
-    List<DemonResponseDTO> getAllDemons();
+    List<DemonResponse> getAllDemons();
 
     Demon getById(UUID id);
 
-    DemonResponseDTO getDemonByLevelId(long levelId);
+    DemonResponse getDemonByLevelId(long levelId);
 
-    DemonResponseDTO createDemon(DemonRequestDTO demonRequestDTO);
+    DemonResponse createDemon(DemonRequest demonRequest);
 
-    DemonResponseDTO update(long levelId, DemonRequestDTO demonRequestDTO);
+    DemonResponse update(long levelId, DemonRequest demonRequest);
 
     void delete(UUID id);
 }

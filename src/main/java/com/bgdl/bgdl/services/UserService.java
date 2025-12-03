@@ -1,9 +1,9 @@
 package com.bgdl.bgdl.services;
 
-import com.bgdl.bgdl.models.dto.auth.AdminUserDTO;
-import com.bgdl.bgdl.models.dto.auth.OAuth2UserInfoDTO;
-import com.bgdl.bgdl.models.dto.auth.PublicUserDTO;
-import com.bgdl.bgdl.models.dto.auth.RegisterRequest;
+import com.bgdl.bgdl.models.response.AdminUserResponse;
+import com.bgdl.bgdl.models.dto.OAuth2UserInfoDTO;
+import com.bgdl.bgdl.models.response.PublicUserResponse;
+import com.bgdl.bgdl.models.request.RegisterRequest;
 import com.bgdl.bgdl.models.entity.User;
 
 import java.util.List;
@@ -14,13 +14,13 @@ public interface UserService {
 
     User findByEmail(String email);
 
-    List<AdminUserDTO> getAllUsers();
+    List<AdminUserResponse> getAllUsers();
 
-    AdminUserDTO getByIdAdmin(UUID id);
+    AdminUserResponse getByIdAdmin(UUID id);
 
-    AdminUserDTO updateUser(UUID id, AdminUserDTO userDTO, PublicUserDTO currentUser);
+    AdminUserResponse updateUser(UUID id, AdminUserResponse userDTO, PublicUserResponse currentUser);
 
-    void deleteUserById(UUID id, PublicUserDTO currentUser);
+    void deleteUserById(UUID id, PublicUserResponse currentUser);
 
     User processOAuthUser(OAuth2UserInfoDTO oAuth2User);
 

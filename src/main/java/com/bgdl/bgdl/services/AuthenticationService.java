@@ -1,8 +1,8 @@
 package com.bgdl.bgdl.services;
 
-import com.bgdl.bgdl.models.dto.auth.AuthenticationRequest;
-import com.bgdl.bgdl.models.dto.auth.AuthenticationResponse;
-import com.bgdl.bgdl.models.dto.auth.RegisterRequest;
+import com.bgdl.bgdl.models.request.AuthenticationRequest;
+import com.bgdl.bgdl.models.response.AuthenticationResponse;
+import com.bgdl.bgdl.models.request.RegisterRequest;
 import com.bgdl.bgdl.models.entity.User;
 
 import java.io.IOException;

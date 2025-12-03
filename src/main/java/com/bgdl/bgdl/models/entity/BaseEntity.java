@@ -1,4 +1,4 @@
-package com.bgdl.bgdl.models.baseEntity;
+package com.bgdl.bgdl.models.entity;
 
 import jakarta.persistence.*;
 import lombok.Getter;

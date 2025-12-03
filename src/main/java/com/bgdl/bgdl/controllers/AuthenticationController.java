@@ -1,11 +1,11 @@
 package com.bgdl.bgdl.controllers;
 
 import com.bgdl.bgdl.config.FrontendConfig;
-import com.bgdl.bgdl.models.dto.auth.AuthenticationRequest;
-import com.bgdl.bgdl.models.dto.auth.AuthenticationResponse;
-import com.bgdl.bgdl.models.dto.auth.RegisterRequest;
+import com.bgdl.bgdl.models.request.AuthenticationRequest;
+import com.bgdl.bgdl.models.response.AuthenticationResponse;
+import com.bgdl.bgdl.models.request.RegisterRequest;
 import com.bgdl.bgdl.models.entity.User;
-import com.bgdl.bgdl.security.filters.JwtAuthenticationFilter;
+import com.bgdl.bgdl.handlers.filters.JwtAuthenticationFilter;
 import com.bgdl.bgdl.services.AuthenticationService;
 import com.bgdl.bgdl.services.impl.security.events.OnPasswordResetRequestEvent;
 import com.bgdl.bgdl.services.impl.security.events.OnRegistrationCompleteEvent;

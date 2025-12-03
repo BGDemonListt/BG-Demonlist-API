@@ -1,8 +1,8 @@
 package com.bgdl.bgdl.services.impl;
 
-import com.bgdl.bgdl.deserializers.LevelSearchResponseDeserializer;
+import com.bgdl.bgdl.models.deserializers.LevelSearchResponseDeserializer;
 import com.bgdl.bgdl.exceptions.common.BadRequestException;
-import com.bgdl.bgdl.models.dto.gd.GDLevelDTO;
+import com.bgdl.bgdl.models.response.gdApi.GDLevelResponse;
 import com.bgdl.bgdl.services.GdRequestService;
 import com.bgdl.bgdl.services.GdService;
 import lombok.RequiredArgsConstructor;
@@ -15,7 +15,7 @@ public class GdServiceImpl implements GdService {
     private final LevelSearchResponseDeserializer levelSearchResponseDeserializer;
 
     @Override
-    public GDLevelDTO getGDLevelById(String levelId) {
+    public GDLevelResponse getGDLevelById(String levelId) {
         String levelData = gdRequestService.getLevelById(levelId);
 
         if (levelData.equals("-1")) {

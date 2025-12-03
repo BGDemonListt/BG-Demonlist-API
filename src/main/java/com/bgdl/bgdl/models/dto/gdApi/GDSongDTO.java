@@ -1,4 +1,4 @@
-package com.bgdl.bgdl.models.dto.gd;
+package com.bgdl.bgdl.models.dto.gdApi;
 
 import com.bgdl.bgdl.enums.MusicLibraryProvider;
 

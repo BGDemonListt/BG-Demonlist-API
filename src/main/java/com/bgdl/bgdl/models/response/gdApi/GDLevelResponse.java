@@ -1,13 +1,14 @@
-package com.bgdl.bgdl.models.dto.gd;
+package com.bgdl.bgdl.models.response.gdApi;
 
 import com.bgdl.bgdl.enums.gd.DemonDifficulty;
 import com.bgdl.bgdl.enums.gd.Difficulty;
 import com.bgdl.bgdl.enums.gd.Length;
 import com.bgdl.bgdl.enums.gd.QualityRating;
+import com.bgdl.bgdl.models.dto.gdApi.GDSongDTO;
 
 import java.util.Optional;
 
-public record GDLevelDTO(
+public record GDLevelResponse(
         long id,
         String name,
         long creatorPlayerId,

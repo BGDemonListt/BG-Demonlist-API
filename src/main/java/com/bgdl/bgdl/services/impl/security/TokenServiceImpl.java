@@ -1,8 +1,8 @@
 package com.bgdl.bgdl.services.impl.security;
 
 import com.bgdl.bgdl.enums.TokenType;
-import com.bgdl.bgdl.models.dto.auth.AuthenticationResponse;
-import com.bgdl.bgdl.models.dto.auth.PublicUserDTO;
+import com.bgdl.bgdl.models.response.AuthenticationResponse;
+import com.bgdl.bgdl.models.response.PublicUserResponse;
 import com.bgdl.bgdl.models.entity.Token;
 import com.bgdl.bgdl.models.entity.User;
 import com.bgdl.bgdl.models.entity.VerificationToken;
@@ -89,7 +89,7 @@ public class TokenServiceImpl implements TokenService {
                 .builder()
                 .accessToken(jwtToken)
                 .refreshToken(refreshToken)
-                .user(modelMapper.map(user, PublicUserDTO.class))
+                .user(modelMapper.map(user, PublicUserResponse.class))
                 .build();
     }
 

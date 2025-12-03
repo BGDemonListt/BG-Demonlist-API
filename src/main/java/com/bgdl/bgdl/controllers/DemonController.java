@@ -1,7 +1,7 @@
 package com.bgdl.bgdl.controllers;
 
-import com.bgdl.bgdl.models.dto.request.DemonRequestDTO;
-import com.bgdl.bgdl.models.dto.response.DemonResponseDTO;
+import com.bgdl.bgdl.models.request.DemonRequest;
+import com.bgdl.bgdl.models.response.DemonResponse;
 import com.bgdl.bgdl.services.DemonService;
 import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 import jakarta.validation.Valid;
@@ -21,32 +21,32 @@ public class DemonController {
     private final DemonService demonService;
 
     @GetMapping
-    public ResponseEntity<List<DemonResponseDTO>> getAll() {
-        List<DemonResponseDTO> demons = demonService.getAllDemons();
+    public ResponseEntity<List<DemonResponse>> getAll() {
+        List<DemonResponse> demons = demonService.getAllDemons();
         return ResponseEntity.ok(demons);
     }
 
     @GetMapping("/{levelId}")
-    public ResponseEntity<DemonResponseDTO> getByLevelId(@PathVariable long levelId) {
-        DemonResponseDTO demon = demonService.getDemonByLevelId(levelId);
+    public ResponseEntity<DemonResponse> getByLevelId(@PathVariable long levelId) {
+        DemonResponse demon = demonService.getDemonByLevelId(levelId);
         return ResponseEntity.ok(demon);
     }
 
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
     @RateLimiter(name = "general_api_rate_limiter")
-    public ResponseEntity<DemonResponseDTO> create(@RequestBody DemonRequestDTO demonRequestDTO) {
-        DemonResponseDTO demon = demonService.createDemon(demonRequestDTO);
+    public ResponseEntity<DemonResponse> create(@RequestBody DemonRequest demonRequest) {
+        DemonResponse demon = demonService.createDemon(demonRequest);
         return ResponseEntity.ok(demon);
     }
 
     @PutMapping("/{levelId}")
     @PreAuthorize("hasRole('ADMIN')")
     @RateLimiter(name = "general_api_rate_limiter")
-    public ResponseEntity<DemonResponseDTO> update(
+    public ResponseEntity<DemonResponse> update(
             @PathVariable long levelId,
-            @Valid @RequestBody DemonRequestDTO demonRequestDTO) {
-        DemonResponseDTO demon = demonService.update(levelId, demonRequestDTO);
+            @Valid @RequestBody DemonRequest demonRequest) {
+        DemonResponse demon = demonService.update(levelId, demonRequest);
         return ResponseEntity.ok(demon);
     }
 

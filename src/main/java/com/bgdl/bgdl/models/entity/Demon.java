@@ -2,7 +2,6 @@ package com.bgdl.bgdl.models.entity;
 
 import com.bgdl.bgdl.enums.gd.DemonDifficulty;
 import com.bgdl.bgdl.exceptions.demon.DemonInvalidPositionException;
-import com.bgdl.bgdl.models.baseEntity.BaseEntity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;

@@ -1,14 +1,14 @@
-package com.bgdl.bgdl.deserializers;
+package com.bgdl.bgdl.models.deserializers;
 
 import com.bgdl.bgdl.enums.MusicLibraryProvider;
 import com.bgdl.bgdl.enums.gd.DemonDifficulty;
 import com.bgdl.bgdl.enums.gd.Difficulty;
 import com.bgdl.bgdl.enums.gd.Length;
 import com.bgdl.bgdl.enums.gd.QualityRating;
-import com.bgdl.bgdl.models.dto.gd.GDCreatorInfoDTO;
-import com.bgdl.bgdl.models.dto.gd.GDIndexes;
-import com.bgdl.bgdl.models.dto.gd.GDLevelDTO;
-import com.bgdl.bgdl.models.dto.gd.GDSongDTO;
+import com.bgdl.bgdl.models.dto.gdApi.GDCreatorInfoDTO;
+import com.bgdl.bgdl.constants.GDIndexes;
+import com.bgdl.bgdl.models.response.gdApi.GDLevelResponse;
+import com.bgdl.bgdl.models.dto.gdApi.GDSongDTO;
 import com.bgdl.bgdl.utils.InternalUtils;
 import org.springframework.stereotype.Component;
 
@@ -18,10 +18,10 @@ import java.util.function.Function;
 import static java.util.function.Predicate.not;
 
 @Component
-public class LevelSearchResponseDeserializer implements Function<String, List<GDLevelDTO>> {
+public class LevelSearchResponseDeserializer implements Function<String, List<GDLevelResponse>> {
 
     @Override
-    public List<GDLevelDTO> apply(String response) {
+    public List<GDLevelResponse> apply(String response) {
         String[] splitData = response.split("#");
         String levels = splitData[0];
         String creators = splitData[1];
@@ -30,7 +30,7 @@ public class LevelSearchResponseDeserializer implements Function<String, List<GD
         Map<Long, GDCreatorInfoDTO> structuredCreatorsInfo = structureCreatorsInfo(creators);
         Map<Long, GDSongDTO> structuredSongsInfo = structureSongsInfo(songs);
 
-        ArrayList<GDLevelDTO> list = new ArrayList<>();
+        ArrayList<GDLevelResponse> list = new ArrayList<>();
         String[] levelArray = levels.split("\\|");
         for (String l : levelArray) {
             Map<Integer, String> data = InternalUtils.splitToMap(l, ":");
@@ -40,8 +40,8 @@ public class LevelSearchResponseDeserializer implements Function<String, List<GD
         return list;
     }
 
-    private GDLevelDTO buildLevel(Map<Integer, String> data, Map<Long, GDCreatorInfoDTO> structuredCreatorsInfo,
-                                  Map<Long, GDSongDTO> structuredSongsInfo) {
+    private GDLevelResponse buildLevel(Map<Integer, String> data, Map<Long, GDCreatorInfoDTO> structuredCreatorsInfo,
+                                       Map<Long, GDSongDTO> structuredSongsInfo) {
         InternalUtils.requireKeys(data, GDIndexes.LEVEL_ID, GDIndexes.LEVEL_NAME, GDIndexes.LEVEL_CREATOR_ID, GDIndexes.LEVEL_DESCRIPTION, GDIndexes.LEVEL_DIFFICULTY,
                 GDIndexes.LEVEL_DEMON_DIFFICULTY, GDIndexes.LEVEL_STARS, GDIndexes.LEVEL_FEATURED_SCORE, GDIndexes.LEVEL_QUALITY_RATING, GDIndexes.LEVEL_DOWNLOADS,
                 GDIndexes.LEVEL_LIKES, GDIndexes.LEVEL_LENGTH, GDIndexes.LEVEL_COIN_COUNT, GDIndexes.LEVEL_COIN_VERIFIED, GDIndexes.LEVEL_VERSION, GDIndexes.LEVEL_GAME_VERSION,
@@ -58,7 +58,7 @@ public class LevelSearchResponseDeserializer implements Function<String, List<GD
 
         final var featuredScore = Integer.parseInt(data.get(GDIndexes.LEVEL_FEATURED_SCORE));
 
-        return new GDLevelDTO(
+        return new GDLevelResponse(
                 Long.parseLong(data.get(GDIndexes.LEVEL_ID)),
                 data.get(GDIndexes.LEVEL_NAME),
                 Long.parseLong(data.get(GDIndexes.LEVEL_CREATOR_ID)),

@@ -2,7 +2,7 @@ package com.bgdl.bgdl.handlers;
 
 import com.bgdl.bgdl.exceptions.common.*;
 import com.bgdl.bgdl.exceptions.user.UserLoginException;
-import com.bgdl.bgdl.models.dto.response.ExceptionResponse;
+import com.bgdl.bgdl.models.response.ExceptionResponse;
 import com.bgdl.bgdl.services.ExceptionService;
 import com.bgdl.bgdl.utils.ApiExceptionParser;
 import io.github.resilience4j.ratelimiter.RequestNotPermitted;

@@ -1,7 +1,7 @@
 package com.bgdl.bgdl.services;
 
 import com.bgdl.bgdl.enums.TokenType;
-import com.bgdl.bgdl.models.dto.auth.AuthenticationResponse;
+import com.bgdl.bgdl.models.response.AuthenticationResponse;
 import com.bgdl.bgdl.models.entity.Token;
 import com.bgdl.bgdl.models.entity.User;
 

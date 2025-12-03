@@ -1,7 +1,6 @@
 package com.bgdl.bgdl.models.entity;
 
 import com.bgdl.bgdl.enums.RecordSubmissionStatus;
-import com.bgdl.bgdl.models.baseEntity.BaseEntity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;

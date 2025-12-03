@@ -1,6 +1,6 @@
 package com.bgdl.bgdl.controllers;
 
-import com.bgdl.bgdl.models.dto.auth.AuthenticationResponse;
+import com.bgdl.bgdl.models.response.AuthenticationResponse;
 import com.bgdl.bgdl.services.OAuth2AuthenticationService;
 import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 import lombok.RequiredArgsConstructor;

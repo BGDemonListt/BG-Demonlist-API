@@ -1,4 +1,4 @@
-package com.bgdl.bgdl.models.dto.auth;
+package com.bgdl.bgdl.models.response;
 
 import com.bgdl.bgdl.enums.Role;
 import lombok.*;
@@ -10,7 +10,7 @@ import java.util.UUID;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class PublicUserDTO {
+public class PublicUserResponse {
     private UUID id;
     private String name;
     private Double score;

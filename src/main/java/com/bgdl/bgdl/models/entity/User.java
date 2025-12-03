@@ -2,7 +2,6 @@ package com.bgdl.bgdl.models.entity;
 
 import com.bgdl.bgdl.enums.Provider;
 import com.bgdl.bgdl.enums.Role;
-import com.bgdl.bgdl.models.baseEntity.BaseEntity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.*;

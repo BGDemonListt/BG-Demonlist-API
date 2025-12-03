@@ -1,8 +1,8 @@
 package com.bgdl.bgdl.controllers;
 
-import com.bgdl.bgdl.models.dto.auth.AdminUserDTO;
-import com.bgdl.bgdl.models.dto.auth.PublicUserDTO;
-import com.bgdl.bgdl.security.filters.JwtAuthenticationFilter;
+import com.bgdl.bgdl.models.response.AdminUserResponse;
+import com.bgdl.bgdl.models.response.PublicUserResponse;
+import com.bgdl.bgdl.handlers.filters.JwtAuthenticationFilter;
 import com.bgdl.bgdl.services.UserService;
 import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 import jakarta.servlet.http.HttpServletRequest;
@@ -22,27 +22,27 @@ public class UserController {
 
     @GetMapping("/all")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<List<AdminUserDTO>> getAllUsers() {
+    public ResponseEntity<List<AdminUserResponse>> getAllUsers() {
         return ResponseEntity.ok(userService.getAllUsers());
     }
 
     @GetMapping("/{id}/admin")
-    public ResponseEntity<AdminUserDTO> getByIdAdmin(@PathVariable UUID id) {
+    public ResponseEntity<AdminUserResponse> getByIdAdmin(@PathVariable UUID id) {
         return ResponseEntity.ok(userService.getByIdAdmin(id));
     }
 
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN') or hasRole('USER')")
     @RateLimiter(name = "general_api_rate_limiter")
-    public ResponseEntity<AdminUserDTO> update(@PathVariable("id") UUID id, @RequestBody AdminUserDTO userDTO, HttpServletRequest httpServletRequest) {
-        PublicUserDTO user = (PublicUserDTO) httpServletRequest.getAttribute(JwtAuthenticationFilter.USER_KEY);
+    public ResponseEntity<AdminUserResponse> update(@PathVariable("id") UUID id, @RequestBody AdminUserResponse userDTO, HttpServletRequest httpServletRequest) {
+        PublicUserResponse user = (PublicUserResponse) httpServletRequest.getAttribute(JwtAuthenticationFilter.USER_KEY);
         return ResponseEntity.ok(userService.updateUser(id, userDTO, user));
     }
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deleteUser(@PathVariable("id") UUID id, HttpServletRequest httpServletRequest) {
-        PublicUserDTO user = (PublicUserDTO) httpServletRequest.getAttribute(JwtAuthenticationFilter.USER_KEY);
+        PublicUserResponse user = (PublicUserResponse) httpServletRequest.getAttribute(JwtAuthenticationFilter.USER_KEY);
         userService.deleteUserById(id, user);
         return ResponseEntity.ok().build();
     }

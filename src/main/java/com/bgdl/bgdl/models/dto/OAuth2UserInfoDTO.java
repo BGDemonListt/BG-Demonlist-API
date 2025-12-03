@@ -1,15 +1,13 @@
-package com.bgdl.bgdl.models.dto.auth;
+package com.bgdl.bgdl.models.dto;
 
 import com.bgdl.bgdl.enums.Provider;
-import com.bgdl.bgdl.models.dto.common.BaseDTO;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
-@EqualsAndHashCode(callSuper = true)
 @Data
 @NoArgsConstructor
-public class OAuth2UserInfoDTO extends BaseDTO {
+public class OAuth2UserInfoDTO {
     private String sub;
     private String name;
     private String given_name;

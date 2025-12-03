@@ -1,6 +1,6 @@
 package com.bgdl.bgdl.controllers;
 
-import com.bgdl.bgdl.models.dto.gd.GDLevelDTO;
+import com.bgdl.bgdl.models.response.gdApi.GDLevelResponse;
 import com.bgdl.bgdl.services.GdService;
 import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 import lombok.RequiredArgsConstructor;
@@ -18,8 +18,8 @@ public class GDLevelController {
 
     @GetMapping("/{levelId}")
     @RateLimiter(name = "sensitive_operations_rate_limiter")
-    public ResponseEntity<GDLevelDTO> getGdLevelById(@PathVariable String levelId) {
-        GDLevelDTO gdLevel = gdService.getGDLevelById(levelId);
+    public ResponseEntity<GDLevelResponse> getGdLevelById(@PathVariable String levelId) {
+        GDLevelResponse gdLevel = gdService.getGDLevelById(levelId);
         return ResponseEntity.ok(gdLevel);
     }
 }

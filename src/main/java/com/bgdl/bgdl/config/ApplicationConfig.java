@@ -1,8 +1,7 @@
 package com.bgdl.bgdl.config;
 
 import com.bgdl.bgdl.exceptions.user.UserNotFoundException;
-import com.bgdl.bgdl.models.baseEntity.BaseEntity;
-import com.bgdl.bgdl.models.dto.common.BaseDTO;
+import com.bgdl.bgdl.models.entity.BaseEntity;
 import com.bgdl.bgdl.repositories.UserRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -45,8 +44,7 @@ public class ApplicationConfig {
                 .getConfiguration()
                 .setPropertyCondition(context -> {
                     if (
-                            !(context.getParent().getDestination() instanceof BaseEntity &&
-                                    context.getParent().getSource() instanceof BaseDTO)
+                            !(context.getParent().getDestination() instanceof BaseEntity)
                     ) {
                         return true;
                     }

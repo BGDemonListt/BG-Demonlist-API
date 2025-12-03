@@ -1,6 +1,6 @@
 package com.bgdl.bgdl.models.entity;
 
-import com.bgdl.bgdl.enums.RecordStatus;
+import com.bgdl.bgdl.enums.RecordSubmissionStatus;
 import com.bgdl.bgdl.models.baseEntity.BaseEntity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Max;
@@ -16,7 +16,7 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 @Entity
-@Table(name = "records")
+@Table(name = "record_submissions")
 public class RecordSubmission extends BaseEntity {
     @NotNull
     @Min(value = 0, message = "Progress must be between 0-100")
@@ -42,10 +42,10 @@ public class RecordSubmission extends BaseEntity {
 
     @NotNull
     @Enumerated(EnumType.STRING)
-    private RecordStatus status;
+    private RecordSubmissionStatus status;
 
     @ManyToOne
     @JoinColumn(name = "user_id")
-    @NotNull(message = "Demon is required")
+    @NotNull(message = "User is required")
     private User holder;
 }

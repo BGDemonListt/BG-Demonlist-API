@@ -1,11 +1,9 @@
 package com.bgdl.bgdl.models.entity;
 
 import com.bgdl.bgdl.enums.gd.DemonDifficulty;
+import com.bgdl.bgdl.exceptions.demon.DemonInvalidPositionException;
 import com.bgdl.bgdl.models.baseEntity.BaseEntity;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -79,7 +77,15 @@ public class Demon extends BaseEntity {
     }
 
     private Double calculatePoints() {
-        // TODO: Add point formula
-        return this.position + 1.5;
+        if (this.position < 1) {
+            throw new DemonInvalidPositionException();
+        }
+
+        if (this.position == 1) {
+            return 323.00;
+        }
+
+        double exponent = -Math.log(322) / (this.position - 1) * (this.position - 1);
+        return 1 + 322 * Math.exp(exponent);
     }
 }

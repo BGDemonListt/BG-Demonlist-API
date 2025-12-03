@@ -1,4 +1,4 @@
-CREATE TABLE records
+CREATE TABLE record_submissions
 (
     id              UUID PRIMARY KEY,
     progress        INT          NOT NULL CHECK (progress >= 0 AND progress <= 100),

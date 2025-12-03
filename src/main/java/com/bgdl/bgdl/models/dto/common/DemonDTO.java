@@ -2,11 +2,13 @@ package com.bgdl.bgdl.models.dto.common;
 
 import com.bgdl.bgdl.enums.gd.DemonDifficulty;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
+@EqualsAndHashCode(callSuper = true)
 @Data
 @NoArgsConstructor
-public class DemonDTO {
+public class DemonDTO extends BaseDTO {
     private String levelTitle;
     private long levelId;
     private String creatorName;

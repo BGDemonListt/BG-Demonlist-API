@@ -1,6 +1,6 @@
 package com.bgdl.bgdl.enums;
 
-public enum RecordStatus {
+public enum RecordSubmissionStatus {
     ACCEPTED,
     PENDING,
     REJECTED

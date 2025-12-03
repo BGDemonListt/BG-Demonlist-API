@@ -36,6 +36,11 @@ public class DemonServiceImpl implements DemonService {
     }
 
     @Override
+    public Demon getById(UUID id) {
+        return getEntityById(id, true);
+    }
+
+    @Override
     public DemonResponseDTO getDemonByLevelId(long levelId) {
         return modelMapper.map(getEntityByLevelId(levelId), DemonResponseDTO.class);
     }
@@ -93,6 +98,15 @@ public class DemonServiceImpl implements DemonService {
         }
 
         return demon.get();
+    }
+
+    private Demon getEntityById(UUID id, boolean deletedCheck) {
+        Demon demon = getEntityById(id);
+        if (deletedCheck && demon.getDeletedAt() != null) {
+            throw new DemonNotFoundException();
+        }
+
+        return demon;
     }
 
     private Demon getEntityByLevelId(long levelId) {

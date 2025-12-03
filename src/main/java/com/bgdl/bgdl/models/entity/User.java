@@ -27,7 +27,6 @@ public class User extends BaseEntity implements UserDetails {
     @NotNull
     private Double score = 0.0;
 
-    @NotBlank(message = "Discord ID mustn't be blank")
     private String discordId;
 
     @Email(message = "Email should be a well-formatted email!")

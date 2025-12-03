@@ -7,7 +7,7 @@ CREATE TABLE users
     deleted_at TIMESTAMP,
     name       VARCHAR(255) CHECK (char_length(name) >= 2),
     score      DOUBLE PRECISION NOT NULL,
-    discord_id VARCHAR(255) CHECK (discord_id <> ''),
+    discord_id VARCHAR(255),
     email      VARCHAR(255) NOT NULL UNIQUE,
     password   VARCHAR(255),
     role       VARCHAR(255) NOT NULL,

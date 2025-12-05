@@ -5,6 +5,7 @@ import com.bgdl.bgdl.services.TokenService;
 import com.bgdl.bgdl.services.impl.security.events.OnRegistrationCompleteEvent;
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.MessageSource;
 import org.springframework.mail.SimpleMailMessage;
@@ -21,8 +22,10 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class RegistrationListener implements ApplicationListener<OnRegistrationCompleteEvent> {
     private final TokenService tokenService;
-    private final MessageSource messages;
     private final JavaMailSender mailSender;
+
+    @Value("${server.backend.baseUrl}")
+    protected String appBaseUrl;
 
     @Override
     @Async
@@ -37,7 +40,7 @@ public class RegistrationListener implements ApplicationListener<OnRegistrationC
 
         String recipientAddress = user.getEmail();
         String subject = "BGDL Registration Confirmation";
-        String confirmationUrl = event.getAppUrl() + "auth/registrationConfirm?token=" + token;
+        String confirmationUrl = appBaseUrl + "auth/registrationConfirm?token=" + token;
 
         // Construct the email message
         String message = "Dear, " + user.getName() + "\n\n"

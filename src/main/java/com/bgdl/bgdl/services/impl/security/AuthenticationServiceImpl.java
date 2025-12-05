@@ -16,13 +16,12 @@ import com.bgdl.bgdl.models.entity.User;
 import com.bgdl.bgdl.models.entity.VerificationToken;
 import com.bgdl.bgdl.repositories.UserRepository;
 import com.bgdl.bgdl.repositories.VerificationTokenRepository;
-import com.bgdl.bgdl.services.AuthenticationService;
-import com.bgdl.bgdl.services.JwtService;
-import com.bgdl.bgdl.services.TokenService;
-import com.bgdl.bgdl.services.UserService;
+import com.bgdl.bgdl.services.*;
+import com.bgdl.bgdl.services.impl.security.events.OnRegistrationCompleteEvent;
 import io.jsonwebtoken.JwtException;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -37,6 +36,8 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class AuthenticationServiceImpl implements AuthenticationService {
+    private final ApplicationEventPublisher eventPublisher;
+    private final PlayerService playerService;
     private final UserService userService;
     private final TokenService tokenService;
     private final JwtService jwtService;
@@ -53,8 +54,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     @Override
     public AuthenticationResponse register(RegisterRequest request) {
         User user = userService.createUser(request);
-
-        userRepository.save(user);
+        eventPublisher.publishEvent(new OnRegistrationCompleteEvent(user));
 
         return tokenService.generateAuthResponse(user);
     }
@@ -241,7 +241,9 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         User user = verificationToken.getUser();
         user.setEnabled(true);
 
-        userRepository.save(user);
+        User savedUser = userRepository.save(user);
+        playerService.createPlayer(savedUser);
+
         verificationTokenRepository.delete(verificationToken);
     }
 

@@ -5,11 +5,10 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
+@EqualsAndHashCode(callSuper = true)
 @Data
 @NoArgsConstructor
-public class DemonDTO {
-    private String levelTitle;
-    private long levelId;
+public class DemonDTO extends DemonBaseDTO{
     private String creatorName;
     private long creatorId;
     private String description;

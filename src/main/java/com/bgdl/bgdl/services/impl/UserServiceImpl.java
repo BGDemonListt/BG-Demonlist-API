@@ -12,6 +12,7 @@ import com.bgdl.bgdl.models.response.PublicUserResponse;
 import com.bgdl.bgdl.models.request.RegisterRequest;
 import com.bgdl.bgdl.models.entity.User;
 import com.bgdl.bgdl.repositories.UserRepository;
+import com.bgdl.bgdl.services.PlayerService;
 import com.bgdl.bgdl.services.UserService;
 import jakarta.validation.ConstraintViolationException;
 import lombok.RequiredArgsConstructor;
@@ -30,6 +31,7 @@ public class UserServiceImpl implements UserService {
     private final PasswordEncoder passwordEncoder;
     private final UserRepository userRepository;
     private final ModelMapper modelMapper;
+    private final PlayerService playerService;
 
     /**
      * Creates a new user based on the provided registration request.
@@ -52,6 +54,7 @@ public class UserServiceImpl implements UserService {
             user.setCreatedAt(LocalDateTime.now());
             user.setUpdatedAt(LocalDateTime.now());
             user.setEnabled(false);
+
             return userRepository.save(user);
         } catch (DataIntegrityViolationException exception) {
             throw new UserCreateException(true);
@@ -83,9 +86,7 @@ public class UserServiceImpl implements UserService {
             throw new AccessDeniedException();
         }
 
-        if (currentUser.getRole().equals(Role.USER)) {
-            userToUpdate.setName(userDTO.getName());
-        } else if (currentUser.getRole().equals(Role.ADMIN)) {
+        if (currentUser.getRole().equals(Role.ADMIN)) {
             // It is not null it is "" so don't change it
             if (userDTO.getPassword() == "") {
                 userDTO.setPassword(userToUpdate.getPassword());

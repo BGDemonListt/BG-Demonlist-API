@@ -6,6 +6,7 @@ import com.bgdl.bgdl.services.TokenService;
 import com.bgdl.bgdl.services.impl.security.events.OnPasswordResetRequestEvent;
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationListener;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -20,7 +21,6 @@ import java.util.UUID;
 @Component
 @RequiredArgsConstructor
 public class PasswordResetListener implements ApplicationListener<OnPasswordResetRequestEvent> {
-
     private final JavaMailSender mailSender;
     private final FrontendConfig frontendConfig;
     private final TokenService tokenService;

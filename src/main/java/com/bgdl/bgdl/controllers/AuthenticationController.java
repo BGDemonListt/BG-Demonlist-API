@@ -37,18 +37,11 @@ public class AuthenticationController {
     private final AuthenticationService authenticationService;
     private final ApplicationEventPublisher eventPublisher;
     private final FrontendConfig frontendConfig;
-    private final ModelMapper modelMapper;
-
-    @Value("${server.backend.baseUrl}")
-    private String appBaseUrl;
 
     @PostMapping("/register")
     @RateLimiter(name = "sensitive_operations_rate_limiter")
     public ResponseEntity<AuthenticationResponse> register(@RequestBody RegisterRequest request) {
         AuthenticationResponse authenticationResponse = authenticationService.register(request);
-
-        User user = modelMapper.map(authenticationResponse.getUser(), User.class);
-        eventPublisher.publishEvent(new OnRegistrationCompleteEvent(user, appBaseUrl));
 
         return ResponseEntity.ok(authenticationResponse);
     }
@@ -89,7 +82,7 @@ public class AuthenticationController {
     @RateLimiter(name = "sensitive_operations_rate_limiter")
     public ResponseEntity<String> forgotPassword(@RequestParam("email") String email) {
         User user = authenticationService.forgotPassword(email);
-        eventPublisher.publishEvent(new OnPasswordResetRequestEvent(user, appBaseUrl));
+        eventPublisher.publishEvent(new OnPasswordResetRequestEvent(user));
         return ResponseEntity.ok("Password reset link sent to your email!");
     }
 

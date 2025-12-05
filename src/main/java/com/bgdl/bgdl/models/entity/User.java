@@ -19,14 +19,8 @@ import java.util.Collection;
 @Entity
 @Table(name = "users")
 public class User extends BaseEntity implements UserDetails {
-
     @Size(min = 2, message = "The name should be at least 2 symbols!")
     private String name;
-
-    @NotNull
-    private Double score = 0.0;
-
-    private String discordId;
 
     @Email(message = "Email should be a well-formatted email!")
     @NotNull(message = "The email should not be null!")
@@ -45,6 +39,10 @@ public class User extends BaseEntity implements UserDetails {
 
     @Column(name = "enabled")
     private boolean enabled;
+
+    @OneToOne
+    @JoinColumn(name = "player_id")
+    private Player player;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

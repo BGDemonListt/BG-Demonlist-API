@@ -24,7 +24,6 @@ import java.util.List;
 @RequiredArgsConstructor
 @Service
 public class TokenServiceImpl implements TokenService {
-
     private final TokenRepository tokenRepository;
     private final VerificationTokenRepository verificationTokenRepository;
     private final JwtService jwtService;

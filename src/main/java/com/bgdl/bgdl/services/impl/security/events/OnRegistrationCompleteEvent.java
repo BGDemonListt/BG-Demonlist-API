@@ -14,17 +14,12 @@ import java.util.Locale;
 @Getter
 public class OnRegistrationCompleteEvent extends ApplicationEvent {
     @Setter
-    private String appUrl;
-    private Locale locale;
-    @Setter
-    @Getter
     private User user;
 
     public OnRegistrationCompleteEvent(
-            User user, String appUrl) {
+            User user) {
         super(user);
 
         this.user = user;
-        this.appUrl = appUrl;
     }
 }

@@ -35,7 +35,6 @@ import java.io.IOException;
 @Tag(name = "Authentication")
 public class AuthenticationController {
     private final AuthenticationService authenticationService;
-    private final ApplicationEventPublisher eventPublisher;
     private final FrontendConfig frontendConfig;
 
     @PostMapping("/register")
@@ -82,7 +81,6 @@ public class AuthenticationController {
     @RateLimiter(name = "sensitive_operations_rate_limiter")
     public ResponseEntity<String> forgotPassword(@RequestParam("email") String email) {
         User user = authenticationService.forgotPassword(email);
-        eventPublisher.publishEvent(new OnPasswordResetRequestEvent(user));
         return ResponseEntity.ok("Password reset link sent to your email!");
     }
 

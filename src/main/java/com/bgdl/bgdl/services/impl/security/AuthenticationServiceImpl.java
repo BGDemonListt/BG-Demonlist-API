@@ -17,6 +17,7 @@ import com.bgdl.bgdl.models.entity.VerificationToken;
 import com.bgdl.bgdl.repositories.UserRepository;
 import com.bgdl.bgdl.repositories.VerificationTokenRepository;
 import com.bgdl.bgdl.services.*;
+import com.bgdl.bgdl.services.impl.security.events.OnPasswordResetRequestEvent;
 import com.bgdl.bgdl.services.impl.security.events.OnRegistrationCompleteEvent;
 import io.jsonwebtoken.JwtException;
 import lombok.RequiredArgsConstructor;
@@ -254,7 +255,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         if (!user.isEnabled()) {
             throw new EmailNotVerified();
         }
-
+        
+        eventPublisher.publishEvent(new OnPasswordResetRequestEvent(user));
         return user;
     }
 }

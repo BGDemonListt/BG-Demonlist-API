@@ -6,6 +6,7 @@ import jakarta.validation.constraints.Size;
 import lombok.*;
 
 import java.util.List;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -24,8 +25,6 @@ public class Player extends BaseEntity {
 
     private Integer rank = null;
 
-    private boolean banned = false;
-
     @ManyToOne
     @JoinColumn(name = "hardest_demon_id")
     private Demon hardestDemon;
@@ -34,5 +33,5 @@ public class Player extends BaseEntity {
     private User user;
 
     @ManyToMany
-    private List<Demon> completedDemons;
+    private Set<Demon> completedDemons;
 }

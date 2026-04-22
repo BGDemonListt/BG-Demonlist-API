@@ -11,6 +11,7 @@ import java.util.UUID;
 @Data
 @NoArgsConstructor
 public class RecordSubmissionRequest extends RecordSubmissionDTO {
-    private UUID userId;
+    private UUID id;
+    private UUID playerId;
     private UUID demonId;
 }

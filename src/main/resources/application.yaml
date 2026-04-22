@@ -1,3 +1,16 @@
+logging:
+  level:
+    net:
+      ttddyy:
+        dsproxy:
+          listener:
+            DEBUG
+    org:
+      springframework:
+        transaction:
+          interceptor:
+            TRACE
+
 server:
   port: 8080
   frontend:
@@ -31,6 +44,7 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
+    show-sql: true
   security:
     jwt:
       secret-key: ${JWT_SECRET}

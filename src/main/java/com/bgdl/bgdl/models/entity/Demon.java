@@ -87,4 +87,17 @@ public class Demon extends BaseEntity {
         double exponent = -Math.log(322) / (this.position - 1) * (this.position - 1);
         return 1 + 322 * Math.exp(exponent);
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Demon)) return false;
+        Demon other = (Demon) o;
+        return getId() != null && getId().equals(other.getId());
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
+    }
 }

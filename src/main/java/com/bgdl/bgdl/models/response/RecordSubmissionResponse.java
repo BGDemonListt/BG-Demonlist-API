@@ -1,5 +1,6 @@
 package com.bgdl.bgdl.models.response;
 
+import com.bgdl.bgdl.enums.RecordSubmissionStatus;
 import com.bgdl.bgdl.models.dto.DemonDTO;
 import com.bgdl.bgdl.models.dto.RecordSubmissionDTO;
 import lombok.Data;
@@ -10,6 +11,6 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 public class RecordSubmissionResponse extends RecordSubmissionDTO {
-    private PublicUserResponse userId;
-    private DemonDTO demonId;
+    private PublicUserResponse holder;
+    private DemonDTO demon;
 }

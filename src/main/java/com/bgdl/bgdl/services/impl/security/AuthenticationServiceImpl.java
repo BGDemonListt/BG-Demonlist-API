@@ -255,7 +255,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         if (!user.isEnabled()) {
             throw new EmailNotVerified();
         }
-        
+
         eventPublisher.publishEvent(new OnPasswordResetRequestEvent(user));
         return user;
     }

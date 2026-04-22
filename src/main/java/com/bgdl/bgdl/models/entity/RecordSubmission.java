@@ -44,7 +44,7 @@ public class RecordSubmission extends BaseEntity {
     private RecordSubmissionStatus status;
 
     @ManyToOne
-    @JoinColumn(name = "user_id")
-    @NotNull(message = "User is required")
-    private User holder;
+    @JoinColumn(name = "holder_id")
+    @NotNull(message = "Player is required")
+    private Player holder;
 }

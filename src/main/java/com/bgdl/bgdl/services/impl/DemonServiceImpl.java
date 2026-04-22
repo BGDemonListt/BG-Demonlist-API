@@ -1,5 +1,6 @@
 package com.bgdl.bgdl.services.impl;
 
+import com.bgdl.bgdl.exceptions.common.NoSuchElementException;
 import com.bgdl.bgdl.exceptions.demon.DemonCreateException;
 import com.bgdl.bgdl.exceptions.demon.DemonNotFoundException;
 import com.bgdl.bgdl.models.request.DemonRequest;
@@ -9,6 +10,7 @@ import com.bgdl.bgdl.repositories.DemonRepository;
 import com.bgdl.bgdl.services.DemonService;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
@@ -20,7 +22,7 @@ import java.util.UUID;
 @Service
 @Component
 @AllArgsConstructor
-public class DemonServiceImpl implements DemonService {
+public class DemonServiceImpl extends BaseService<Demon, UUID> implements DemonService {
     private final ModelMapper modelMapper;
     private final DemonRepository demonRepository;
 
@@ -79,41 +81,24 @@ public class DemonServiceImpl implements DemonService {
 
     @Override
     public void delete(UUID id) {
-        Demon demon = getEntityById(id);
-
-        if (demon.getDeletedAt() == null) {
-            demon.setDeletedAt(LocalDateTime.now());
-        } else {
-            demon.setDeletedAt(null);
-        }
-
-        demonRepository.save(demon);
+        super.delete(id);
     }
 
-    private Demon getEntityById(UUID id) {
-        Optional<Demon> demon = demonRepository.findById(id);
-
-        if (demon.isEmpty()) {
-            throw new DemonNotFoundException();
-        }
-
-        return demon.get();
+    @Override
+    protected JpaRepository<Demon, UUID> getRepository() {
+        return demonRepository;
     }
 
-    private Demon getEntityById(UUID id, boolean deletedCheck) {
-        Demon demon = getEntityById(id);
-        if (deletedCheck && demon.getDeletedAt() != null) {
-            throw new DemonNotFoundException();
-        }
-
-        return demon;
+    @Override
+    protected NoSuchElementException notFoundException() {
+        return new DemonNotFoundException();
     }
 
     private Demon getEntityByLevelId(long levelId) {
         Optional<Demon> demon = demonRepository.findByDeletedAtIsNullAndLevelId(levelId);
 
         if (demon.isEmpty()) {
-            throw new DemonNotFoundException();
+            throw this.notFoundException();
         }
 
         return demon.get();

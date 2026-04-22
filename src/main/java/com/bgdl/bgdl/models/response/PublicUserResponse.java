@@ -13,7 +13,7 @@ import java.util.UUID;
 public class PublicUserResponse {
     private UUID id;
     private String name;
-    private Double score;
+    private Double points;
     private String email;
     private Role role;
 }

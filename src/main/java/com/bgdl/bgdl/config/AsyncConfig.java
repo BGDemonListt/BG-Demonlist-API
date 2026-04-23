@@ -24,6 +24,17 @@ public class AsyncConfig {
         }
     }
 
+    @Bean(name = "leaderboardRebuildExecutor")
+    public Executor leaderboardRebuildExecutor() {
+        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+        executor.setCorePoolSize(1);
+        executor.setMaxPoolSize(1);
+        executor.setQueueCapacity(1);
+        executor.setThreadNamePrefix("LeaderboardRebuild-");
+        executor.initialize();
+        return executor;
+    }
+
     private boolean supportsVirtualThreads() {
         // Check for virtual threads support
         return System.getProperty("java.version").startsWith("19") ||

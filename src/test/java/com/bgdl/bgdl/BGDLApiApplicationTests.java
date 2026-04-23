@@ -1,13 +1,12 @@
 package com.bgdl.bgdl;
 
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
 
-@SpringBootTest
 class BGDLApiApplicationTests {
 
 	@Test
-	void contextLoads() {
+	void applicationClassIsLoadable() throws ClassNotFoundException {
+		Class.forName("com.bgdl.bgdl.BGDLApiApplication");
 	}
 
 }

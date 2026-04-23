@@ -38,7 +38,7 @@ class DemonServiceImplTest {
     private DemonServiceImpl demonService;
 
     @Test
-    void createDemonInsertsAtRequestedPositionAndRebuildsLeaderboard() {
+    void createDemonInsertsAtRequestedPositionAndRequestsLeaderboardRebuild() {
         Demon existingFirst = demon("Existing First", 111L, 1, 323.0);
         Demon existingSecond = demon("Existing Second", 222L, 2, 150.0);
         DemonRequest request = demonRequest(333L, "Inserted", 1);
@@ -61,11 +61,11 @@ class DemonServiceImplTest {
         assertTrue(savedDemons.get(0).getPoints() > savedDemons.get(1).getPoints());
         assertTrue(savedDemons.get(1).getPoints() > savedDemons.get(2).getPoints());
         assertEquals("Inserted", response.getLevelTitle());
-        verify(leaderboardService).rebuildLeaderboard();
+        verify(leaderboardService).requestRebuild();
     }
 
     @Test
-    void updateDemonReordersExistingDemonAndRebuildsLeaderboard() {
+    void updateDemonReordersExistingDemonAndRequestsLeaderboardRebuild() {
         Demon first = demon("First", 111L, 1, 323.0);
         Demon second = demon("Second", 222L, 2, 150.0);
         Demon target = demon("Target", 333L, 3, 100.0);
@@ -88,11 +88,11 @@ class DemonServiceImplTest {
         assertEquals(2, savedDemons.get(1).getPosition());
         assertEquals(3, savedDemons.get(2).getPosition());
         assertEquals("Target Updated", response.getLevelTitle());
-        verify(leaderboardService).rebuildLeaderboard();
+        verify(leaderboardService).requestRebuild();
     }
 
     @Test
-    void deleteSoftDeletesDemonRebalancesAndRebuildsLeaderboard() {
+    void deleteSoftDeletesDemonRebalancesAndRequestsLeaderboardRebuild() {
         Demon toDelete = demon("Target", 333L, 2, 150.0);
         Demon remaining = demon("Remaining", 111L, 1, 323.0);
 
@@ -107,7 +107,7 @@ class DemonServiceImplTest {
         verify(demonRepository).save(toDelete);
         assertTrue(toDelete.getDeletedAt() != null);
         verify(demonRepository).saveAll(anyList());
-        verify(leaderboardService).rebuildLeaderboard();
+        verify(leaderboardService).requestRebuild();
     }
 
     private DemonRequest demonRequest(long levelId, String title, int position) {

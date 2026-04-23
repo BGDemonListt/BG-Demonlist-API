@@ -24,7 +24,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class LeaderboardServiceImplTest {
+class LeaderboardRebuildWorkerTest {
 
     @Mock
     private PlayerRepository playerRepository;
@@ -33,7 +33,7 @@ class LeaderboardServiceImplTest {
     private RecordSubmissionRepository recordSubmissionRepository;
 
     @InjectMocks
-    private LeaderboardServiceImpl leaderboardService;
+    private LeaderboardRebuildWorker leaderboardRebuildWorker;
 
     @Test
     void rebuildLeaderboardRecomputesCompletedDemonsPointsHardestAndRanks() {
@@ -54,7 +54,7 @@ class LeaderboardServiceImplTest {
         when(recordSubmissionRepository.findAllByDeletedAtIsNullAndStatus(RecordSubmissionStatus.ACCEPTED))
                 .thenReturn(List.of(alphaTop, alphaDuplicate, betaMid, removed));
 
-        leaderboardService.rebuildLeaderboard();
+        leaderboardRebuildWorker.rebuildLeaderboard();
 
         assertEquals(323.0, firstPlayer.getPoints());
         assertEquals(1, firstPlayer.getRank());

@@ -87,7 +87,7 @@ public class RecordSubmissionServiceImpl extends BaseService<RecordSubmission, U
         RecordSubmission savedSubmission = recordSubmissionRepository.save(submission);
 
         if (previousStatus == RecordSubmissionStatus.ACCEPTED ^ savedSubmission.getStatus() == RecordSubmissionStatus.ACCEPTED) {
-            leaderboardService.rebuildLeaderboard();
+            leaderboardService.requestRebuild();
         }
 
         return toResponse(getEntityById(savedSubmission.getId(), true));
@@ -104,7 +104,7 @@ public class RecordSubmissionServiceImpl extends BaseService<RecordSubmission, U
         super.delete(id);
 
         if (affectsLeaderboard) {
-            leaderboardService.rebuildLeaderboard();
+            leaderboardService.requestRebuild();
         }
     }
 

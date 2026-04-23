@@ -20,9 +20,11 @@ public class Player extends BaseEntity {
     @Size(min = 2, message = "The name should be at least 2 symbols!")
     private String name;
 
+    @Builder.Default
     @NotNull
     private Double points = 0.0;
 
+    @Builder.Default
     private Integer rank = null;
 
     @ManyToOne

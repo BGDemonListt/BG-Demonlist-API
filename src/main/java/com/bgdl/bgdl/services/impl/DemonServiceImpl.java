@@ -63,7 +63,7 @@ public class DemonServiceImpl extends BaseService<Demon, UUID> implements DemonS
 
         try {
             demonRepository.saveAll(reorderedDemons);
-            leaderboardService.rebuildLeaderboard();
+            leaderboardService.requestRebuild();
             return toResponse(demon);
         } catch (RuntimeException exception) {
             throw new DemonCreateException(false);
@@ -89,7 +89,7 @@ public class DemonServiceImpl extends BaseService<Demon, UUID> implements DemonS
 
         List<Demon> reorderedDemons = reorderDemons(activeDemons, demon, demonRequest.getPosition());
         demonRepository.saveAll(reorderedDemons);
-        leaderboardService.rebuildLeaderboard();
+        leaderboardService.requestRebuild();
         return toResponse(demon);
     }
 
@@ -108,7 +108,7 @@ public class DemonServiceImpl extends BaseService<Demon, UUID> implements DemonS
             demonRepository.saveAll(reorderedDemons);
         }
 
-        leaderboardService.rebuildLeaderboard();
+        leaderboardService.requestRebuild();
     }
 
     @Override

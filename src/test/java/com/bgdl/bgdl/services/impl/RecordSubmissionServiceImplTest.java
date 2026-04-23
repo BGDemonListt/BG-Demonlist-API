@@ -76,11 +76,11 @@ class RecordSubmissionServiceImplTest {
         assertEquals("Player One", response.getHolder().getName());
         assertEquals("Top Demon", response.getDemon().getLevelTitle());
         assertNotNull(response.getId());
-        verify(leaderboardService, never()).rebuildLeaderboard();
+        verify(leaderboardService, never()).requestRebuild();
     }
 
     @Test
-    void updateRebuildsLeaderboardWhenSubmissionBecomesAccepted() {
+    void updateRequestsLeaderboardRebuildWhenSubmissionBecomesAccepted() {
         UUID submissionId = UUID.randomUUID();
         RecordSubmission submission = submission(submissionId, RecordSubmissionStatus.PENDING);
         RecordSubmissionRequest request = new RecordSubmissionRequest();
@@ -93,11 +93,11 @@ class RecordSubmissionServiceImplTest {
         RecordSubmissionResponse response = recordSubmissionService.update(request);
 
         assertEquals(RecordSubmissionStatus.ACCEPTED, response.getStatus());
-        verify(leaderboardService).rebuildLeaderboard();
+        verify(leaderboardService).requestRebuild();
     }
 
     @Test
-    void updateRebuildsLeaderboardWhenSubmissionLosesAcceptedStatus() {
+    void updateRequestsLeaderboardRebuildWhenSubmissionLosesAcceptedStatus() {
         UUID submissionId = UUID.randomUUID();
         RecordSubmission submission = submission(submissionId, RecordSubmissionStatus.ACCEPTED);
         RecordSubmissionRequest request = new RecordSubmissionRequest();
@@ -110,11 +110,11 @@ class RecordSubmissionServiceImplTest {
         RecordSubmissionResponse response = recordSubmissionService.update(request);
 
         assertEquals(RecordSubmissionStatus.REJECTED, response.getStatus());
-        verify(leaderboardService).rebuildLeaderboard();
+        verify(leaderboardService).requestRebuild();
     }
 
     @Test
-    void updateDoesNotRebuildLeaderboardForPendingToRejectedTransition() {
+    void updateDoesNotRequestLeaderboardRebuildForPendingToRejectedTransition() {
         UUID submissionId = UUID.randomUUID();
         RecordSubmission submission = submission(submissionId, RecordSubmissionStatus.PENDING);
         RecordSubmissionRequest request = new RecordSubmissionRequest();
@@ -127,11 +127,11 @@ class RecordSubmissionServiceImplTest {
         RecordSubmissionResponse response = recordSubmissionService.update(request);
 
         assertEquals(RecordSubmissionStatus.REJECTED, response.getStatus());
-        verify(leaderboardService, never()).rebuildLeaderboard();
+        verify(leaderboardService, never()).requestRebuild();
     }
 
     @Test
-    void deleteRebuildsLeaderboardWhenAcceptedSubmissionIsRemoved() {
+    void deleteRequestsLeaderboardRebuildWhenAcceptedSubmissionIsRemoved() {
         UUID submissionId = UUID.randomUUID();
         RecordSubmission submission = submission(submissionId, RecordSubmissionStatus.ACCEPTED);
 
@@ -141,7 +141,7 @@ class RecordSubmissionServiceImplTest {
         recordSubmissionService.delete(submissionId);
 
         verify(recordSubmissionRepository).save(submission);
-        verify(leaderboardService).rebuildLeaderboard();
+        verify(leaderboardService).requestRebuild();
     }
 
     private RecordSubmission submission(UUID id, RecordSubmissionStatus status) {

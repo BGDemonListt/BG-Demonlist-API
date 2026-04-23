@@ -2,9 +2,9 @@ package com.bgdl.bgdl.services;
 
 import com.bgdl.bgdl.models.response.AdminUserResponse;
 import com.bgdl.bgdl.models.entity.DiscordProfile;
-import com.bgdl.bgdl.models.dto.OAuth2UserInfoDTO;
+import com.bgdl.bgdl.models.dto.auth.OAuth2UserInfoDTO;
 import com.bgdl.bgdl.models.response.PublicUserResponse;
-import com.bgdl.bgdl.models.request.RegisterRequest;
+import com.bgdl.bgdl.models.request.auth.RegisterRequest;
 import com.bgdl.bgdl.models.entity.User;
 
 import java.util.List;

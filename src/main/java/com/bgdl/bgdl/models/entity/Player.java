@@ -17,7 +17,7 @@ import java.util.Set;
 @Entity
 @Table(name = "players")
 public class Player extends BaseEntity {
-    @Size(min = 2, message = "The name should be at least 2 symbols!")
+    @Size(min = 2, message = "Името трябва да е поне 2 символа!")
     private String name;
 
     @Builder.Default

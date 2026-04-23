@@ -18,25 +18,25 @@ import lombok.*;
 @Table(name = "record_submissions")
 public class RecordSubmission extends BaseEntity {
     @NotNull
-    @Min(value = 0, message = "Progress must be between 0-100")
-    @Max(value = 100, message = "Progress must be between 0-100")
+    @Min(value = 0, message = "Прогресът трябва да бъде между 0 и 100")
+    @Max(value = 100, message = "Прогресът трябва да бъде между 0 и 100")
     private int progress;
 
     @NotNull
-    @NotBlank(message = "Youtube URL is required")
+    @NotBlank(message = "YouTube URL адресът е задължителен")
     private String youtubeUrl;
 
     @NotNull
-    @NotBlank(message = "Raw footage URL is required")
+    @NotBlank(message = "URL адресът на суровия запис е задължителен")
     private String rawFootageUrl;
 
     @NotNull
-    @NotBlank(message = "Description is required")
+    @NotBlank(message = "Описанието е задължително")
     private String description;
 
     @ManyToOne
     @JoinColumn(name = "demon_id")
-    @NotNull(message = "Demon is required")
+    @NotNull(message = "Демонът е задължителен")
     private Demon demon;
 
     @NotNull
@@ -45,6 +45,6 @@ public class RecordSubmission extends BaseEntity {
 
     @ManyToOne
     @JoinColumn(name = "holder_id")
-    @NotNull(message = "Player is required")
+    @NotNull(message = "Играчът е задължителен")
     private Player holder;
 }

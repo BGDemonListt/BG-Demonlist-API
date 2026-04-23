@@ -21,43 +21,43 @@ public class Demon extends BaseEntity {
     private static final double TOP_DEMON_POINTS = 323.0;
 
     @NotNull
-    @NotBlank(message = "Level title is required")
+    @NotBlank(message = "Името на нивото е задължително")
     private String levelTitle;
 
     @NotNull
-    @Min(value = 1, message = "Level ID is required")
+    @Min(value = 1, message = "ID на нивото е задължително")
     private Long levelId;
 
     @NotNull
-    @NotBlank(message = "Creator name is required")
+    @NotBlank(message = "Името на създателя е задължително")
     private String creatorName;
 
     @NotNull
-    @Min(value = 1, message = "Creator ID is required")
+    @Min(value = 1, message = "ID на създателя е задължително")
     private Long creatorId;
 
     @NotNull
-    @NotBlank(message = "Description is required")
+    @NotBlank(message = "Описанието е задължително")
     private String description;
 
     @NotNull
-    @NotBlank(message = "Level password is required")
+    @NotBlank(message = "Паролата на нивото е задължителна")
     private String levelPassword;
 
     @NotNull
-    @NotBlank(message = "Music name is required")
+    @NotBlank(message = "Името на музиката е задължително")
     private String musicName;
 
     @NotNull
-    @Min(value = 1, message = "Music ID is required")
+    @Min(value = 1, message = "ID на музиката е задължително")
     private Long musicId;
 
     @NotNull
-    @NotBlank(message = "Music creator is required")
+    @NotBlank(message = "Името на автора на музиката е задължително")
     private String musicCreatorName;
 
     @NotNull
-    @NotBlank(message = "Music URL is required")
+    @NotBlank(message = "URL адресът на музиката е задължителен")
     private String musicUrl;
 
     @NotNull

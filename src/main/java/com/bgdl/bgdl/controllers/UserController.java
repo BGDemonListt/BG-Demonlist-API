@@ -2,7 +2,7 @@ package com.bgdl.bgdl.controllers;
 
 import com.bgdl.bgdl.models.response.AdminUserResponse;
 import com.bgdl.bgdl.models.response.PublicUserResponse;
-import com.bgdl.bgdl.handlers.filters.JwtAuthenticationFilter;
+import com.bgdl.bgdl.security.filter.JwtAuthenticationFilter;
 import com.bgdl.bgdl.services.UserService;
 import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 import jakarta.servlet.http.HttpServletRequest;

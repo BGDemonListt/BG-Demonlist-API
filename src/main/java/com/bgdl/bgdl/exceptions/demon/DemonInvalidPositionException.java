@@ -4,6 +4,6 @@ import com.bgdl.bgdl.exceptions.common.BadRequestException;
 
 public class DemonInvalidPositionException extends BadRequestException {
     public DemonInvalidPositionException() {
-        super("Position must be greater than 0!");
+        super("Позицията трябва да бъде по-голяма от 0!");
     }
 }

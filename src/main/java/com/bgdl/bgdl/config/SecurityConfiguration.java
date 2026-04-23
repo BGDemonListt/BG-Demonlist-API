@@ -1,7 +1,7 @@
 package com.bgdl.bgdl.config;
 
-import com.bgdl.bgdl.handlers.JwtAuthenticationEntryPoint;
-import com.bgdl.bgdl.handlers.filters.JwtAuthenticationFilter;
+import com.bgdl.bgdl.security.JwtAuthenticationEntryPoint;
+import com.bgdl.bgdl.security.filter.JwtAuthenticationFilter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;

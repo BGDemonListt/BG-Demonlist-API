@@ -19,11 +19,11 @@ import java.util.Collection;
 @Entity
 @Table(name = "users")
 public class User extends BaseEntity implements UserDetails {
-    @Size(min = 2, message = "The name should be at least 2 symbols!")
+    @Size(min = 2, message = "Името трябва да е поне 2 символа!")
     private String name;
 
-    @Email(message = "Email should be a well-formatted email!")
-    @NotNull(message = "The email should not be null!")
+    @Email(message = "Имейлът трябва да бъде в правилен формат!")
+    @NotNull(message = "Имейлът не може да бъде празен!")
     @Column(unique = true)
     private String email;
 

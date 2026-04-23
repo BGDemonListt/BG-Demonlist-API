@@ -4,6 +4,6 @@ import com.bgdl.bgdl.exceptions.common.UnauthorizedException;
 
 public class InvalidDiscordLinkStateException extends UnauthorizedException {
     public InvalidDiscordLinkStateException() {
-        super("Invalid or expired Discord link state.");
+        super("Невалиден или изтекъл state параметър за свързване на Discord.");
     }
 }

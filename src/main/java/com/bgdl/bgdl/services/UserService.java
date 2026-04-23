@@ -1,6 +1,7 @@
 package com.bgdl.bgdl.services;
 
 import com.bgdl.bgdl.models.response.AdminUserResponse;
+import com.bgdl.bgdl.models.entity.DiscordProfile;
 import com.bgdl.bgdl.models.dto.OAuth2UserInfoDTO;
 import com.bgdl.bgdl.models.response.PublicUserResponse;
 import com.bgdl.bgdl.models.request.RegisterRequest;
@@ -27,4 +28,10 @@ public interface UserService {
     User findById(UUID id);
 
     void enableUser(User user);
+
+    PublicUserResponse toPublicUserResponse(User user);
+
+    PublicUserResponse linkDiscordAccount(UUID userId, DiscordProfile discordProfile);
+
+    PublicUserResponse unlinkDiscordAccount(UUID userId);
 }

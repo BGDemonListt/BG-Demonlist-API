@@ -18,6 +18,7 @@ server:
     loginUrl: ${server.frontend.baseUrl}/login
     finishRegisterUrl: ${server.frontend.baseUrl}/finish-register
     oauth2RedirectUrl: ${server.frontend.baseUrl}/process-oauth2
+    discordLinkRedirectUrl: ${server.frontend.baseUrl}/process-discord-link
     forgottenPasswordUrl: ${server.frontend.baseUrl}/forgotten-password
   backend:
     baseUrl: ${BACKEND_URL}
@@ -73,5 +74,14 @@ spring:
               enable: true
             timeout: 8000
 application:
-upload:
-  directory: server/src/main/resources/static/uploads/
+  oauth2:
+    discord:
+      clientId: ${DISCORD_CLIENT_ID}
+      clientSecret: ${DISCORD_CLIENT_SECRET}
+      authorizationUri: https://discord.com/oauth2/authorize
+      tokenUri: https://discord.com/api/oauth2/token
+      apiBaseUri: https://discord.com/api/v10
+      userInfoPath: /users/@me
+      stateTtl: 10m
+  upload:
+    directory: server/src/main/resources/static/uploads/

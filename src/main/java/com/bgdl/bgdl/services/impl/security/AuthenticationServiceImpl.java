@@ -21,7 +21,6 @@ import com.bgdl.bgdl.services.impl.security.events.OnPasswordResetRequestEvent;
 import com.bgdl.bgdl.services.impl.security.events.OnRegistrationCompleteEvent;
 import io.jsonwebtoken.JwtException;
 import lombok.RequiredArgsConstructor;
-import org.modelmapper.ModelMapper;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.DisabledException;
@@ -43,7 +42,6 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private final TokenService tokenService;
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
-    private final ModelMapper modelMapper;
     private final VerificationTokenRepository verificationTokenRepository;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
@@ -193,8 +191,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             refreshTokenString = refreshToken.getToken();
         }
 
-        PublicUserResponse publicUser = modelMapper.map(accessToken.getUser(), PublicUserResponse.class);
-        publicUser.setPlayerId(user.getPlayer() != null ? user.getPlayer().getId() : null);
+        PublicUserResponse publicUser = userService.toPublicUserResponse(user);
 
         return AuthenticationResponse
                 .builder()

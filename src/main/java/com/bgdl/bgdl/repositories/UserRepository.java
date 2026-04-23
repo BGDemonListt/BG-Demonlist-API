@@ -14,5 +14,7 @@ public interface UserRepository extends JpaRepository<User, UUID> {
 
     Optional<User> findByEmail(String email);
 
+    Optional<User> findByDiscord_Id(String discordId);
+
     List<User> findByEnabledFalseAndCreatedAtBeforeAndDeletedAtIsNull(LocalDateTime thresholdDateTime);
 }

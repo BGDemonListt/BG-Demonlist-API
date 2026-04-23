@@ -14,7 +14,6 @@ import java.time.LocalDateTime;
 public class AdminUserResponse extends PublicUserResponse {
     private boolean enabled;
     private String password;
-    private String discordId;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private LocalDateTime deletedAt;

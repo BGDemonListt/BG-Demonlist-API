@@ -37,6 +37,9 @@ public class User extends BaseEntity implements UserDetails {
     @Enumerated(EnumType.STRING)
     private Provider provider;
 
+    @Embedded
+    private DiscordProfile discord;
+
     @Column(name = "enabled")
     private boolean enabled;
 

@@ -10,8 +10,8 @@ import com.bgdl.bgdl.repositories.TokenRepository;
 import com.bgdl.bgdl.repositories.VerificationTokenRepository;
 import com.bgdl.bgdl.services.JwtService;
 import com.bgdl.bgdl.services.TokenService;
+import com.bgdl.bgdl.services.UserService;
 import lombok.RequiredArgsConstructor;
-import org.modelmapper.ModelMapper;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,7 +27,7 @@ public class TokenServiceImpl implements TokenService {
     private final TokenRepository tokenRepository;
     private final VerificationTokenRepository verificationTokenRepository;
     private final JwtService jwtService;
-    private final ModelMapper modelMapper;
+    private final UserService userService;
 
     @Override
     public Token findByToken(String jwt) {
@@ -80,8 +80,7 @@ public class TokenServiceImpl implements TokenService {
     public AuthenticationResponse generateAuthResponse(User user) {
         String jwtToken = jwtService.generateToken(user);
         String refreshToken = jwtService.generateRefreshToken(user);
-        PublicUserResponse publicUser = modelMapper.map(user, PublicUserResponse.class);
-        publicUser.setPlayerId(user.getPlayer() != null ? user.getPlayer().getId() : null);
+        PublicUserResponse publicUser = userService.toPublicUserResponse(user);
 
         saveToken(user, jwtToken, TokenType.ACCESS);
         saveToken(user, refreshToken, TokenType.REFRESH);

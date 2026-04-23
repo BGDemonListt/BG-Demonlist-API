@@ -1,6 +1,7 @@
 package com.bgdl.bgdl.models.response;
 
 import com.bgdl.bgdl.enums.Role;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 
 import java.util.UUID;
@@ -17,6 +18,9 @@ public class PublicUserResponse {
     private Double points;
     private String email;
     private Role role;
+
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    private DiscordProfileResponse discord;
 
     public UUID getPlayerId() {
         return playerId;

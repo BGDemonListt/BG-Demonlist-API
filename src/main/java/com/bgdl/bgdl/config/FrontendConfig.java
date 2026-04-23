@@ -18,4 +18,5 @@ public class FrontendConfig {
     private String loginUrl;
     private String forgottenPasswordUrl;
     private String oauth2RedirectUrl;
+    private String discordLinkRedirectUrl;
 }

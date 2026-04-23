@@ -9,9 +9,9 @@ import com.bgdl.bgdl.models.response.PublicUserResponse;
 import com.bgdl.bgdl.repositories.TokenRepository;
 import com.bgdl.bgdl.repositories.VerificationTokenRepository;
 import com.bgdl.bgdl.services.JwtService;
+import com.bgdl.bgdl.services.UserService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.modelmapper.ModelMapper;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -37,7 +37,7 @@ class TokenServiceImplTest {
     private JwtService jwtService;
 
     @Mock
-    private ModelMapper modelMapper;
+    private UserService userService;
 
     @InjectMocks
     private TokenServiceImpl tokenService;
@@ -54,17 +54,19 @@ class TokenServiceImplTest {
         user.setId(userId);
         user.setPlayer(player);
 
+        PublicUserResponse publicUserResponse = new PublicUserResponse();
+
         when(jwtService.generateToken(user)).thenReturn("access-token");
         when(jwtService.generateRefreshToken(user)).thenReturn("refresh-token");
-        when(modelMapper.map(user, PublicUserResponse.class)).thenReturn(new PublicUserResponse());
+        when(userService.toPublicUserResponse(user)).thenReturn(publicUserResponse);
         when(tokenRepository.save(any(Token.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         AuthenticationResponse response = tokenService.generateAuthResponse(user);
 
         assertEquals("access-token", response.getAccessToken());
         assertEquals("refresh-token", response.getRefreshToken());
-        assertEquals(playerId, response.getUser().getPlayerId());
+        assertEquals(publicUserResponse, response.getUser());
         verify(tokenRepository, times(2)).save(any(Token.class));
-        verify(modelMapper).map(user, PublicUserResponse.class);
+        verify(userService).toPublicUserResponse(user);
     }
 }

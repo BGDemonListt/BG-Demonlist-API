@@ -3,16 +3,17 @@ package com.bgdl.bgdl.services.impl;
 import com.bgdl.bgdl.enums.Provider;
 import com.bgdl.bgdl.enums.Role;
 import com.bgdl.bgdl.exceptions.common.AccessDeniedException;
+import com.bgdl.bgdl.exceptions.user.DiscordAccountAlreadyLinkedException;
 import com.bgdl.bgdl.exceptions.user.UserCreateException;
 import com.bgdl.bgdl.exceptions.user.UserNotFoundException;
 import com.bgdl.bgdl.exceptions.user.UserValidationException;
 import com.bgdl.bgdl.models.response.AdminUserResponse;
 import com.bgdl.bgdl.models.dto.OAuth2UserInfoDTO;
+import com.bgdl.bgdl.models.entity.DiscordProfile;
 import com.bgdl.bgdl.models.response.PublicUserResponse;
 import com.bgdl.bgdl.models.request.RegisterRequest;
 import com.bgdl.bgdl.models.entity.User;
 import com.bgdl.bgdl.repositories.UserRepository;
-import com.bgdl.bgdl.services.PlayerService;
 import com.bgdl.bgdl.services.UserService;
 import jakarta.validation.ConstraintViolationException;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +21,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -31,7 +33,6 @@ public class UserServiceImpl implements UserService {
     private final PasswordEncoder passwordEncoder;
     private final UserRepository userRepository;
     private final ModelMapper modelMapper;
-    private final PlayerService playerService;
 
     /**
      * Creates a new user based on the provided registration request.
@@ -81,6 +82,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public AdminUserResponse updateUser(UUID id, AdminUserResponse userDTO, PublicUserResponse currentUser) {
         User userToUpdate = findById(id);
+        DiscordProfile currentDiscordProfile = userToUpdate.getDiscord();
 
         if (!(userToUpdate.getId().equals(currentUser.getId())) && !currentUser.getRole().equals(Role.ADMIN)) {
             throw new AccessDeniedException();
@@ -95,6 +97,7 @@ public class UserServiceImpl implements UserService {
             }
 
             modelMapper.map(userDTO, userToUpdate);
+            userToUpdate.setDiscord(currentDiscordProfile);
         }
 
         userToUpdate.setId(id);
@@ -186,5 +189,34 @@ public class UserServiceImpl implements UserService {
         user.setEnabled(true);
         userRepository.save(user);
     }
-}
 
+    @Override
+    public PublicUserResponse toPublicUserResponse(User user) {
+        PublicUserResponse response = modelMapper.map(user, PublicUserResponse.class);
+        response.setPlayerId(user.getPlayer() != null ? user.getPlayer().getId() : null);
+        return response;
+    }
+
+    @Override
+    @Transactional
+    public PublicUserResponse linkDiscordAccount(UUID userId, DiscordProfile discordProfile) {
+        User user = findById(userId);
+
+        userRepository.findByDiscord_Id(discordProfile.getId())
+                .filter(existingUser -> !existingUser.getId().equals(userId))
+                .ifPresent(existingUser -> {
+                    throw new DiscordAccountAlreadyLinkedException();
+                });
+
+        user.setDiscord(discordProfile);
+        return toPublicUserResponse(userRepository.save(user));
+    }
+
+    @Override
+    @Transactional
+    public PublicUserResponse unlinkDiscordAccount(UUID userId) {
+        User user = findById(userId);
+        user.setDiscord(null);
+        return toPublicUserResponse(userRepository.save(user));
+    }
+}

@@ -1,7 +1,6 @@
 package com.bgdl.bgdl.handlers.filters;
 
 import com.bgdl.bgdl.exceptions.user.UserNotFoundException;
-import com.bgdl.bgdl.models.response.PublicUserResponse;
 import com.bgdl.bgdl.models.entity.User;
 import com.bgdl.bgdl.repositories.TokenRepository;
 import com.bgdl.bgdl.services.JwtService;
@@ -11,7 +10,6 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import org.modelmapper.ModelMapper;
 import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -38,7 +36,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
     private final UserService userService;
-    private final ModelMapper modelMapper;
     private final TokenRepository tokenRepository;
 
     @Override
@@ -47,14 +44,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             @NonNull HttpServletResponse response,
             @NonNull FilterChain filterChain
     ) throws ServletException, IOException {
-        String path = request.getServletPath();
-
-        // Skip authentication for specific paths related to authentication process
-        if (path.contains("/api/v1/oauth2")) {
-            filterChain.doFilter(request, response);
-            return;
-        }
-
         request.setAttribute(USER_KEY, null);
         request.setAttribute(JWT_KEY, null);
 
@@ -109,16 +98,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 );
 
                 SecurityContextHolder.getContext().setAuthentication(authToken);
+                if (userDetails instanceof User user) {
+                    request.setAttribute(USER_KEY, userService.toPublicUserResponse(user));
+                }
+                request.setAttribute(JWT_KEY, jwt);
             }
-
-            // Set user details in request attribute
-            PublicUserResponse publicUserResponse = modelMapper.map(userDetails, PublicUserResponse.class);
-            if (userDetails instanceof User user) {
-                publicUserResponse.setPlayerId(user.getPlayer() != null ? user.getPlayer().getId() : null);
-            }
-
-            request.setAttribute(USER_KEY, publicUserResponse);
-            request.setAttribute(JWT_KEY, jwt);
         }
 
         filterChain.doFilter(request, response);

@@ -17,6 +17,9 @@ import lombok.*;
 @Entity
 @Table(name = "demons")
 public class Demon extends BaseEntity {
+    private static final double BASE_POINTS = 1.0;
+    private static final double TOP_DEMON_POINTS = 323.0;
+
     @NotNull
     @NotBlank(message = "Level title is required")
     private String levelTitle;
@@ -70,22 +73,18 @@ public class Demon extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private DemonDifficulty difficulty;
 
-    public void setPosition(int position) {
-        this.position = position;
-        this.points = calculatePoints();
-    }
-
-    private Double calculatePoints() {
-        if (this.position < 1) {
+    public void recalculatePoints(int totalDemons) {
+        if (this.position < 1 || totalDemons < 1) {
             throw new DemonInvalidPositionException();
         }
 
-        if (this.position == 1) {
-            return 323.00;
+        if (this.position == 1 || totalDemons == 1) {
+            this.points = TOP_DEMON_POINTS;
+            return;
         }
 
-        double exponent = -Math.log(322) / (this.position - 1) * (this.position - 1);
-        return 1 + 322 * Math.exp(exponent);
+        double exponent = -Math.log(TOP_DEMON_POINTS - BASE_POINTS) / (totalDemons - 1) * (this.position - 1);
+        this.points = BASE_POINTS + (TOP_DEMON_POINTS - BASE_POINTS) * Math.exp(exponent);
     }
 
     @Override

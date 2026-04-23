@@ -74,7 +74,7 @@ public class UserServiceImpl implements UserService {
         return userRepository
                 .findAll()
                 .stream()
-                .map(x -> modelMapper.map(x, AdminUserResponse.class))
+                .map(this::toAdminUserResponse)
                 .toList();
     }
 
@@ -100,7 +100,7 @@ public class UserServiceImpl implements UserService {
         userToUpdate.setId(id);
 
         User updatedUser = userRepository.save(userToUpdate);
-        return modelMapper.map(updatedUser, AdminUserResponse.class);
+        return toAdminUserResponse(updatedUser);
     }
 
 
@@ -157,7 +157,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public AdminUserResponse getByIdAdmin(UUID id) {
         User user = userRepository.findById(id).orElseThrow(UserNotFoundException::new);
-        return modelMapper.map(user, AdminUserResponse.class);
+        return toAdminUserResponse(user);
     }
 
     private User buildUser(RegisterRequest request) {
@@ -173,6 +173,18 @@ public class UserServiceImpl implements UserService {
         }
 
         return userBuilder.build();
+    }
+
+    private AdminUserResponse toAdminUserResponse(User user) {
+        AdminUserResponse response = modelMapper.map(user, AdminUserResponse.class);
+        response.setPlayerId(user.getPlayer() != null ? user.getPlayer().getId() : null);
+        return response;
+    }
+
+    @Override
+    public void enableUser(User user) {
+        user.setEnabled(true);
+        userRepository.save(user);
     }
 }
 

@@ -17,7 +17,8 @@ public class DemonDTO extends DemonBaseDTO{
     private long musicId;
     private String musicCreatorName;
     private String musicUrl;
+    private int requirement;
     private int position;
-    private int points;
+    private Double points;
     private DemonDifficulty difficulty;
 }

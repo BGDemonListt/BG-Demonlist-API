@@ -1,16 +1,18 @@
 package com.bgdl.bgdl.models.response;
 
-import com.bgdl.bgdl.enums.RecordSubmissionStatus;
-import com.bgdl.bgdl.models.dto.DemonDTO;
+import com.bgdl.bgdl.models.dto.DemonBaseDTO;
 import com.bgdl.bgdl.models.dto.RecordSubmissionDTO;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
+import java.util.UUID;
+
 @EqualsAndHashCode(callSuper = true)
 @Data
 @NoArgsConstructor
 public class RecordSubmissionResponse extends RecordSubmissionDTO {
-    private PublicUserResponse holder;
-    private DemonDTO demon;
+    private UUID id;
+    private PlayerSummaryResponse holder;
+    private DemonBaseDTO demon;
 }

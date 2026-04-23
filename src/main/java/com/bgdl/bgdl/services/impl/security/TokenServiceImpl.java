@@ -80,6 +80,8 @@ public class TokenServiceImpl implements TokenService {
     public AuthenticationResponse generateAuthResponse(User user) {
         String jwtToken = jwtService.generateToken(user);
         String refreshToken = jwtService.generateRefreshToken(user);
+        PublicUserResponse publicUser = modelMapper.map(user, PublicUserResponse.class);
+        publicUser.setPlayerId(user.getPlayer() != null ? user.getPlayer().getId() : null);
 
         saveToken(user, jwtToken, TokenType.ACCESS);
         saveToken(user, refreshToken, TokenType.REFRESH);
@@ -88,7 +90,7 @@ public class TokenServiceImpl implements TokenService {
                 .builder()
                 .accessToken(jwtToken)
                 .refreshToken(refreshToken)
-                .user(modelMapper.map(user, PublicUserResponse.class))
+                .user(publicUser)
                 .build();
     }
 

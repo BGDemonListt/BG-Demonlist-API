@@ -25,4 +25,6 @@ public interface UserService {
     User processOAuthUser(OAuth2UserInfoDTO oAuth2User);
 
     User findById(UUID id);
+
+    void enableUser(User user);
 }

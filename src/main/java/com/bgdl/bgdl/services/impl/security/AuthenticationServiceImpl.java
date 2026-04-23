@@ -194,6 +194,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         }
 
         PublicUserResponse publicUser = modelMapper.map(accessToken.getUser(), PublicUserResponse.class);
+        publicUser.setPlayerId(user.getPlayer() != null ? user.getPlayer().getId() : null);
 
         return AuthenticationResponse
                 .builder()

@@ -1,142 +1,118 @@
 package com.bgdl.bgdl.services.impl;
 
+import com.bgdl.bgdl.exceptions.player.PlayerNotFoundException;
+import com.bgdl.bgdl.models.dto.DemonBaseDTO;
 import com.bgdl.bgdl.models.entity.Demon;
 import com.bgdl.bgdl.models.entity.Player;
-import com.bgdl.bgdl.models.entity.RecordSubmission;
 import com.bgdl.bgdl.models.entity.User;
-import com.bgdl.bgdl.models.response.PlayerResponse;
+import com.bgdl.bgdl.models.response.PageResponse;
+import com.bgdl.bgdl.models.response.PlayerDetailsResponse;
+import com.bgdl.bgdl.models.response.PlayerSummaryResponse;
 import com.bgdl.bgdl.repositories.PlayerRepository;
+import com.bgdl.bgdl.repositories.UserRepository;
 import com.bgdl.bgdl.services.PlayerService;
-import lombok.AllArgsConstructor;
-import org.modelmapper.ModelMapper;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.Comparator;
+import java.util.LinkedHashSet;
+import java.util.UUID;
 
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class PlayerServiceImpl implements PlayerService {
+    private static final int PLAYERS_PAGE_SIZE = 15;
+
     private final PlayerRepository playerRepository;
-    private final ModelMapper modelMapper;
-
-    @Override
-    public PlayerResponse createPlayer(User user) {
-        Player player = Player.builder()
-                .name(user.getName())
-                .user(user)
-                .points(0.0)
-                .completedDemons(Collections.emptySet())
-                .build();
-
-        Player savedUser = playerRepository.save(player);
-        return modelMapper.map(savedUser, PlayerResponse.class);
-    }
-
-    @Override
-    public Player getById(UUID id) {
-        return getEntityById(id, true);
-    }
-
-    @Override
-    public Optional<PlayerResponse> findClosestRelativePlayer(double oldPoints, double newPoints) {
-        Optional<Player> optionalPlayer;
-
-        if (newPoints > oldPoints) {
-            // gained points → look above
-            optionalPlayer = playerRepository
-                    .findFirstByPointsGreaterThanOrderByPointsAsc(newPoints);
-        } else {
-            // lost points → look below
-            optionalPlayer = playerRepository
-                    .findFirstByPointsLessThanOrderByPointsDesc(newPoints);
-        }
-
-        return optionalPlayer.map(player -> modelMapper.map(player, PlayerResponse.class));
-    }
-
-    @Override
-    public void shiftDownBetween(double newPoints, double oldPoints) {
-        playerRepository.shiftDownBetween(newPoints, oldPoints);
-    }
-
-    @Override
-    public void shiftUpBetween(double newPoints, double oldPoints) {
-        playerRepository.shiftUpBetween(newPoints, oldPoints);
-    }
-
-    @Override
-    public int getLastPosition() {
-        return (int) playerRepository.countAllByDeletedAtIsNullAndRankIsNotNull();
-    }
+    private final UserRepository userRepository;
 
     @Override
     @Transactional
-    public void beatDemon(Player player, Demon demon, int newPos) {
-        Player fetchedPlayer = getEntityById(player.getId());
-
-        if (fetchedPlayer.getCompletedDemons().contains(demon)) {
+    public void createPlayer(User user) {
+        if (user.getPlayer() != null) {
             return;
         }
 
-        if (fetchedPlayer.getHardestDemon() == null || fetchedPlayer.getHardestDemon().getPosition() > demon.getPosition()) {
-            fetchedPlayer.setHardestDemon(demon);
-        }
+        Player player = Player.builder()
+                .name(user.getName())
+                .points(0.0)
+                .completedDemons(new LinkedHashSet<>())
+                .build();
 
-        fetchedPlayer.getCompletedDemons().add(demon);
-        fetchedPlayer.setPoints(fetchedPlayer.getPoints() + demon.getPoints());
-        fetchedPlayer.setRank(newPos);
-        playerRepository.save(fetchedPlayer);
+        Player savedPlayer = playerRepository.save(player);
+        user.setPlayer(savedPlayer);
+        userRepository.save(user);
     }
 
     @Override
-    public void removeDemon(Player player, Demon demon, int newPos) {
-        Player fetchedPlayer = getEntityById(player.getId());
-
-
-        if (!fetchedPlayer.getCompletedDemons().contains(demon)) {
-            return;
-        }
-
-        Set<Demon> completedDemons = fetchedPlayer.getCompletedDemons();
-        completedDemons.remove(demon);
-
-        if (!completedDemons.isEmpty()) {
-            fetchedPlayer.setPoints(fetchedPlayer.getPoints() - demon.getPoints());
-            fetchedPlayer.setRank(newPos);
-
-            if (fetchedPlayer.getHardestDemon() != null && fetchedPlayer.getHardestDemon().equals(demon)) {
-                Optional<Demon> hardestDemon = completedDemons.stream().max(Comparator.comparing(Demon::getPosition));
-                hardestDemon.ifPresent(fetchedPlayer::setHardestDemon);
-            }
-        } else {
-            fetchedPlayer.setHardestDemon(null);
-            fetchedPlayer.setPoints(0.0);
-            fetchedPlayer.setRank(null);
-        }
-
-        fetchedPlayer.setCompletedDemons(completedDemons);
-        playerRepository.save(fetchedPlayer);
+    @Transactional(readOnly = true)
+    public Player getById(UUID id) {
+        return playerRepository.findByDeletedAtIsNullAndId(id)
+                .orElseThrow(PlayerNotFoundException::new);
     }
 
-    private Player getEntityById(UUID id) {
-        Optional<Player> player = playerRepository.findById(id);
+    @Override
+    @Transactional(readOnly = true)
+    public PageResponse<PlayerSummaryResponse> getPlayers(String nameFilter, int page) {
+        int sanitizedPage = Math.max(page, 1);
+        Pageable pageable = PageRequest.of(sanitizedPage - 1, PLAYERS_PAGE_SIZE);
+        Page<Player> playersPage = playerRepository.findLeaderboardPage(
+                nameFilter == null ? "" : nameFilter.trim(),
+                pageable
+        );
 
-        if (player.isEmpty()) {
-            throw new IllegalArgumentException();
-        }
-
-        return player.get();
+        return PageResponse.<PlayerSummaryResponse>builder()
+                .content(playersPage.stream().map(this::toPlayerSummary).toList())
+                .page(sanitizedPage)
+                .size(playersPage.getSize())
+                .totalElements(playersPage.getTotalElements())
+                .totalPages(playersPage.getTotalPages())
+                .build();
     }
 
-    private Player getEntityById(UUID id, boolean deletedCheck) {
-        Player player = getEntityById(id);
+    @Override
+    @Transactional(readOnly = true)
+    public PlayerDetailsResponse getPlayerDetails(UUID id) {
+        Player player = playerRepository.findDetailedById(id)
+                .orElseThrow(PlayerNotFoundException::new);
 
-        if (deletedCheck && player.getDeletedAt() != null) {
-            throw new IllegalArgumentException();
+        PlayerDetailsResponse response = new PlayerDetailsResponse();
+        response.setId(player.getId());
+        response.setName(player.getName());
+        response.setPoints(player.getPoints());
+        response.setPosition(player.getRank());
+        response.setHardestDemon(toDemonBase(player.getHardestDemon()));
+        response.setCompletedDemons(
+                player.getCompletedDemons().stream()
+                        .sorted(Comparator.comparingInt(Demon::getPosition))
+                        .map(this::toDemonBase)
+                        .toList()
+        );
+        return response;
+    }
+
+    private PlayerSummaryResponse toPlayerSummary(Player player) {
+        PlayerSummaryResponse response = new PlayerSummaryResponse();
+        response.setId(player.getId());
+        response.setName(player.getName());
+        response.setPoints(player.getPoints());
+        response.setPosition(player.getRank());
+        return response;
+    }
+
+    private DemonBaseDTO toDemonBase(Demon demon) {
+        if (demon == null) {
+            return null;
         }
 
-        return player;
+        DemonBaseDTO response = new DemonBaseDTO();
+        response.setId(demon.getId());
+        response.setLevelTitle(demon.getLevelTitle());
+        response.setLevelId(demon.getLevelId());
+        return response;
     }
 }

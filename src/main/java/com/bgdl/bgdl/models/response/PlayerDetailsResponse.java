@@ -7,12 +7,11 @@ import java.util.List;
 import java.util.UUID;
 
 @Data
-public class PlayerResponse {
+public class PlayerDetailsResponse {
     private UUID id;
     private String name;
     private Double points;
-    private Integer rank;
-    private boolean banned;
+    private Integer position;
     private DemonBaseDTO hardestDemon;
     private List<DemonBaseDTO> completedDemons;
 }

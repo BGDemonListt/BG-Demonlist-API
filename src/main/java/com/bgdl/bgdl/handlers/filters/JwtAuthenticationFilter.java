@@ -2,6 +2,7 @@ package com.bgdl.bgdl.handlers.filters;
 
 import com.bgdl.bgdl.exceptions.user.UserNotFoundException;
 import com.bgdl.bgdl.models.response.PublicUserResponse;
+import com.bgdl.bgdl.models.entity.User;
 import com.bgdl.bgdl.repositories.TokenRepository;
 import com.bgdl.bgdl.services.JwtService;
 import com.bgdl.bgdl.services.UserService;
@@ -49,7 +50,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String path = request.getServletPath();
 
         // Skip authentication for specific paths related to authentication process
-        if (path.contains("/api/v1/auth") || path.contains("/api/v1/oauth2")) {
+        if (path.contains("/api/v1/oauth2")) {
             filterChain.doFilter(request, response);
             return;
         }
@@ -111,7 +112,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             }
 
             // Set user details in request attribute
-            request.setAttribute(USER_KEY, modelMapper.map(userDetails, PublicUserResponse.class));
+            PublicUserResponse publicUserResponse = modelMapper.map(userDetails, PublicUserResponse.class);
+            if (userDetails instanceof User user) {
+                publicUserResponse.setPlayerId(user.getPlayer() != null ? user.getPlayer().getId() : null);
+            }
+
+            request.setAttribute(USER_KEY, publicUserResponse);
             request.setAttribute(JWT_KEY, jwt);
         }
 

@@ -5,7 +5,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 
-import java.util.List;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 @Getter
@@ -32,6 +32,8 @@ public class Player extends BaseEntity {
     @OneToOne(mappedBy = "player")
     private User user;
 
+    @Builder.Default
     @ManyToMany
-    private Set<Demon> completedDemons;
+    @OrderBy("position ASC")
+    private Set<Demon> completedDemons = new LinkedHashSet<>();
 }

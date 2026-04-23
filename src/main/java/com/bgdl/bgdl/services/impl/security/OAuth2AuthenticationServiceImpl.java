@@ -7,6 +7,7 @@ import com.bgdl.bgdl.models.response.AuthenticationResponse;
 import com.bgdl.bgdl.models.dto.OAuth2UserInfoDTO;
 import com.bgdl.bgdl.models.entity.User;
 import com.bgdl.bgdl.services.OAuth2AuthenticationService;
+import com.bgdl.bgdl.services.PlayerService;
 import com.bgdl.bgdl.services.TokenService;
 import com.bgdl.bgdl.services.UserService;
 import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeRequestUrl;
@@ -32,6 +33,7 @@ public class OAuth2AuthenticationServiceImpl implements OAuth2AuthenticationServ
     private final FrontendConfig frontendConfig;
     private final WebClient userInfoClient;
     private final UserService userService;
+    private final PlayerService playerService;
     private final TokenService tokenService;
 
 
@@ -54,8 +56,10 @@ public class OAuth2AuthenticationServiceImpl implements OAuth2AuthenticationServ
 
         // Process OAuth2 user and retrieve associated user entity
         User user = userService.processOAuthUser(oAuth2UserInfoDTO);
+        playerService.createPlayer(user);
         tokenService.revokeAllUserTokens(user);
 
+        userService.enableUser(user);
         return tokenService.generateAuthResponse(user);
     }
 

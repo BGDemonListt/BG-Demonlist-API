@@ -1,14 +1,15 @@
 package com.bgdl.bgdl.services;
 
 import com.bgdl.bgdl.models.request.DemonRequest;
+import com.bgdl.bgdl.models.response.PageResponse;
+import com.bgdl.bgdl.models.response.DemonSummaryResponse;
 import com.bgdl.bgdl.models.response.DemonResponse;
 import com.bgdl.bgdl.models.entity.Demon;
 
-import java.util.List;
 import java.util.UUID;
 
 public interface DemonService {
-    List<DemonResponse> getAllDemons();
+    PageResponse<DemonSummaryResponse> getAllDemons(String nameFilter, int page);
 
     Demon getById(UUID id);
 

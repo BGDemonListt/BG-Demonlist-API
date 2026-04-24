@@ -6,10 +6,18 @@ import com.bgdl.bgdl.exceptions.demon.DemonInvalidPositionException;
 import com.bgdl.bgdl.exceptions.demon.DemonNotFoundException;
 import com.bgdl.bgdl.models.entity.Demon;
 import com.bgdl.bgdl.models.request.DemonRequest;
+import com.bgdl.bgdl.models.response.DemonSummaryResponse;
 import com.bgdl.bgdl.models.response.DemonResponse;
+import com.bgdl.bgdl.models.response.PageResponse;
 import com.bgdl.bgdl.repositories.DemonRepository;
+import com.bgdl.bgdl.repositories.specification.DemonSpecifications;
 import com.bgdl.bgdl.services.DemonService;
 import com.bgdl.bgdl.services.LeaderboardService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Service;
@@ -23,16 +31,31 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 public class DemonServiceImpl extends BaseService<Demon, UUID> implements DemonService {
+    private static final int DEMONS_PAGE_SIZE = 20;
+
     private final DemonRepository demonRepository;
     private final LeaderboardService leaderboardService;
 
     @Override
     @Transactional(readOnly = true)
-    public List<DemonResponse> getAllDemons() {
-        return demonRepository.findAllByDeletedAtIsNullOrderByPositionAsc()
-                .stream()
-                .map(this::toResponse)
-                .toList();
+    public PageResponse<DemonSummaryResponse> getAllDemons(String nameFilter, int page) {
+        int sanitizedPage = Math.max(page, 1);
+        Pageable pageable = PageRequest.of(sanitizedPage - 1, DEMONS_PAGE_SIZE, Sort.by(Sort.Direction.ASC, "position"));
+        Page<Demon> demonsPage = demonRepository.findAll(
+                Specification.allOf(
+                        DemonSpecifications.active(),
+                        DemonSpecifications.nameContains(nameFilter)
+                ),
+                pageable
+        );
+
+        return PageResponse.<DemonSummaryResponse>builder()
+                .content(demonsPage.stream().map(this::toSummaryResponse).toList())
+                .page(sanitizedPage)
+                .size(demonsPage.getSize())
+                .totalElements(demonsPage.getTotalElements())
+                .totalPages(demonsPage.getTotalPages())
+                .build();
     }
 
     @Override
@@ -167,6 +190,7 @@ public class DemonServiceImpl extends BaseService<Demon, UUID> implements DemonS
         demon.setCreatorId(request.getCreatorId());
         demon.setDescription(request.getDescription());
         demon.setLevelPassword(request.getLevelPassword());
+        demon.setYoutubeUrl(request.getYoutubeUrl());
         demon.setMusicName(request.getMusicName());
         demon.setMusicId(request.getMusicId());
         demon.setMusicCreatorName(request.getMusicCreatorName());
@@ -174,6 +198,18 @@ public class DemonServiceImpl extends BaseService<Demon, UUID> implements DemonS
         demon.setRequirement(request.getRequirement());
         demon.setDifficulty(request.getDifficulty());
         return demon;
+    }
+
+    private DemonSummaryResponse toSummaryResponse(Demon demon) {
+        DemonSummaryResponse response = new DemonSummaryResponse();
+        response.setId(demon.getId());
+        response.setLevelId(demon.getLevelId());
+        response.setName(demon.getLevelTitle());
+        response.setPosition(demon.getPosition());
+        response.setPoints(demon.getPoints());
+        response.setCreator(demon.getCreatorName());
+        response.setYoutubeUrl(demon.getYoutubeUrl());
+        return response;
     }
 
     private DemonResponse toResponse(Demon demon) {
@@ -185,6 +221,7 @@ public class DemonServiceImpl extends BaseService<Demon, UUID> implements DemonS
         response.setCreatorId(demon.getCreatorId());
         response.setDescription(demon.getDescription());
         response.setLevelPassword(demon.getLevelPassword());
+        response.setYoutubeUrl(demon.getYoutubeUrl());
         response.setMusicName(demon.getMusicName());
         response.setMusicId(demon.getMusicId());
         response.setMusicCreatorName(demon.getMusicCreatorName());

@@ -13,6 +13,7 @@ public class DemonDTO extends DemonBaseDTO{
     private long creatorId;
     private String description;
     private String levelPassword;
+    private String youtubeUrl;
     private String musicName;
     private long musicId;
     private String musicCreatorName;

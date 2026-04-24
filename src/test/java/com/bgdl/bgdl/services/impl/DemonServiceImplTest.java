@@ -4,6 +4,8 @@ import com.bgdl.bgdl.enums.gd.DemonDifficulty;
 import com.bgdl.bgdl.models.entity.Demon;
 import com.bgdl.bgdl.models.request.DemonRequest;
 import com.bgdl.bgdl.models.response.DemonResponse;
+import com.bgdl.bgdl.models.response.DemonSummaryResponse;
+import com.bgdl.bgdl.models.response.PageResponse;
 import com.bgdl.bgdl.repositories.DemonRepository;
 import com.bgdl.bgdl.services.LeaderboardService;
 import org.junit.jupiter.api.Test;
@@ -12,6 +14,9 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.jpa.domain.Specification;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,6 +43,28 @@ class DemonServiceImplTest {
     private DemonServiceImpl demonService;
 
     @Test
+    void getAllDemonsReturnsPagedSummariesFilteredByName() {
+        Demon first = demon("Acheron", 111L, 1, 323.0);
+        first.setYoutubeUrl("https://youtube.com/watch?v=acheron");
+        Demon second = demon("Avernus", 222L, 2, 250.0);
+        second.setYoutubeUrl("https://youtube.com/watch?v=avernus");
+
+        when(demonRepository.findAll(any(Specification.class), any(PageRequest.class)))
+                .thenReturn(new PageImpl<>(List.of(first, second), PageRequest.of(0, 20), 2));
+
+        PageResponse<DemonSummaryResponse> response = demonService.getAllDemons("ach", 1);
+
+        assertEquals(1, response.getPage());
+        assertEquals(20, response.getSize());
+        assertEquals(2, response.getTotalElements());
+        assertEquals(2, response.getContent().size());
+        assertEquals(first.getId(), response.getContent().get(0).getId());
+        assertEquals("Acheron", response.getContent().get(0).getName());
+        assertEquals("Creator", response.getContent().get(0).getCreator());
+        assertEquals("https://youtube.com/watch?v=acheron", response.getContent().get(0).getYoutubeUrl());
+    }
+
+    @Test
     void createDemonInsertsAtRequestedPositionAndRequestsLeaderboardRebuild() {
         Demon existingFirst = demon("Existing First", 111L, 1, 323.0);
         Demon existingSecond = demon("Existing Second", 222L, 2, 150.0);
@@ -61,6 +88,7 @@ class DemonServiceImplTest {
         assertTrue(savedDemons.get(0).getPoints() > savedDemons.get(1).getPoints());
         assertTrue(savedDemons.get(1).getPoints() > savedDemons.get(2).getPoints());
         assertEquals("Inserted", response.getLevelTitle());
+        assertEquals("https://youtube.com/watch?v=demon", response.getYoutubeUrl());
         verify(leaderboardService).requestRebuild();
     }
 
@@ -88,6 +116,7 @@ class DemonServiceImplTest {
         assertEquals(2, savedDemons.get(1).getPosition());
         assertEquals(3, savedDemons.get(2).getPosition());
         assertEquals("Target Updated", response.getLevelTitle());
+        assertEquals("https://youtube.com/watch?v=demon", response.getYoutubeUrl());
         verify(leaderboardService).requestRebuild();
     }
 
@@ -118,6 +147,7 @@ class DemonServiceImplTest {
         request.setCreatorId(999L);
         request.setDescription("Description");
         request.setLevelPassword("copyable");
+        request.setYoutubeUrl("https://youtube.com/watch?v=demon");
         request.setMusicName("Track");
         request.setMusicId(123L);
         request.setMusicCreatorName("Artist");
@@ -137,6 +167,7 @@ class DemonServiceImplTest {
         demon.setCreatorId(1L);
         demon.setDescription("Description");
         demon.setLevelPassword("copyable");
+        demon.setYoutubeUrl("https://youtube.com/watch?v=demon");
         demon.setMusicName("Track");
         demon.setMusicId(1L);
         demon.setMusicCreatorName("Artist");

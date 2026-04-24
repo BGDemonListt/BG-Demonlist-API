@@ -44,6 +44,9 @@ public class Demon extends BaseEntity {
     @NotBlank(message = "Паролата на нивото е задължителна")
     private String levelPassword;
 
+    @Column(name = "youtube_url")
+    private String youtubeUrl;
+
     @NotNull
     @NotBlank(message = "Името на музиката е задължително")
     private String musicName;

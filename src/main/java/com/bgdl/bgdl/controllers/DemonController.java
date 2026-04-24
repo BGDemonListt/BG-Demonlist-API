@@ -2,6 +2,8 @@ package com.bgdl.bgdl.controllers;
 
 import com.bgdl.bgdl.models.request.DemonRequest;
 import com.bgdl.bgdl.models.response.DemonResponse;
+import com.bgdl.bgdl.models.response.DemonSummaryResponse;
+import com.bgdl.bgdl.models.response.PageResponse;
 import com.bgdl.bgdl.services.DemonService;
 import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 import jakarta.validation.Valid;
@@ -11,7 +13,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -21,8 +22,11 @@ public class DemonController {
     private final DemonService demonService;
 
     @GetMapping
-    public ResponseEntity<List<DemonResponse>> getAll() {
-        List<DemonResponse> demons = demonService.getAllDemons();
+    public ResponseEntity<PageResponse<DemonSummaryResponse>> getAll(
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "") String name
+    ) {
+        PageResponse<DemonSummaryResponse> demons = demonService.getAllDemons(name, page);
         return ResponseEntity.ok(demons);
     }
 
@@ -35,7 +39,7 @@ public class DemonController {
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
     @RateLimiter(name = "general_api_rate_limiter")
-    public ResponseEntity<DemonResponse> create(@RequestBody DemonRequest demonRequest) {
+    public ResponseEntity<DemonResponse> create(@Valid @RequestBody DemonRequest demonRequest) {
         DemonResponse demon = demonService.createDemon(demonRequest);
         return ResponseEntity.ok(demon);
     }

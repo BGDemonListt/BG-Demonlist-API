@@ -6,10 +6,11 @@ import com.bgdl.bgdl.models.response.DemonSummaryResponse;
 import com.bgdl.bgdl.models.response.DemonResponse;
 import com.bgdl.bgdl.models.entity.Demon;
 
+import java.util.Set;
 import java.util.UUID;
 
 public interface DemonService {
-    PageResponse<DemonSummaryResponse> getAllDemons(String nameFilter, int page);
+    PageResponse<DemonSummaryResponse> getAllDemons(String nameFilter, Set<UUID> skillsetTagIds, int page);
 
     Demon getById(UUID id);
 

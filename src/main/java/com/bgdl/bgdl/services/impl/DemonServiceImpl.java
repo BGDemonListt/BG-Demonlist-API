@@ -4,12 +4,17 @@ import com.bgdl.bgdl.exceptions.common.NoSuchElementException;
 import com.bgdl.bgdl.exceptions.demon.DemonCreateException;
 import com.bgdl.bgdl.exceptions.demon.DemonInvalidPositionException;
 import com.bgdl.bgdl.exceptions.demon.DemonNotFoundException;
+import com.bgdl.bgdl.exceptions.demon.DemonSkillsetTagLimitExceededException;
+import com.bgdl.bgdl.exceptions.skillsettag.SkillsetTagNotFoundException;
 import com.bgdl.bgdl.models.entity.Demon;
+import com.bgdl.bgdl.models.entity.SkillsetTag;
 import com.bgdl.bgdl.models.request.DemonRequest;
 import com.bgdl.bgdl.models.response.DemonSummaryResponse;
 import com.bgdl.bgdl.models.response.DemonResponse;
 import com.bgdl.bgdl.models.response.PageResponse;
+import com.bgdl.bgdl.models.response.SkillsetTagResponse;
 import com.bgdl.bgdl.repositories.DemonRepository;
+import com.bgdl.bgdl.repositories.SkillsetTagRepository;
 import com.bgdl.bgdl.repositories.specification.DemonSpecifications;
 import com.bgdl.bgdl.services.DemonService;
 import com.bgdl.bgdl.services.LeaderboardService;
@@ -24,8 +29,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 @Service
@@ -34,17 +42,19 @@ public class DemonServiceImpl extends BaseService<Demon, UUID> implements DemonS
     private static final int DEMONS_PAGE_SIZE = 20;
 
     private final DemonRepository demonRepository;
+    private final SkillsetTagRepository skillsetTagRepository;
     private final LeaderboardService leaderboardService;
 
     @Override
     @Transactional(readOnly = true)
-    public PageResponse<DemonSummaryResponse> getAllDemons(String nameFilter, int page) {
+    public PageResponse<DemonSummaryResponse> getAllDemons(String nameFilter, Set<UUID> skillsetTagIds, int page) {
         int sanitizedPage = Math.max(page, 1);
         Pageable pageable = PageRequest.of(sanitizedPage - 1, DEMONS_PAGE_SIZE, Sort.by(Sort.Direction.ASC, "position"));
         Page<Demon> demonsPage = demonRepository.findAll(
                 Specification.allOf(
                         DemonSpecifications.active(),
-                        DemonSpecifications.nameContains(nameFilter)
+                        DemonSpecifications.nameContains(nameFilter),
+                        DemonSpecifications.hasAnySkillsetTag(skillsetTagIds)
                 ),
                 pageable
         );
@@ -197,18 +207,19 @@ public class DemonServiceImpl extends BaseService<Demon, UUID> implements DemonS
         demon.setMusicUrl(request.getMusicUrl());
         demon.setRequirement(request.getRequirement());
         demon.setDifficulty(request.getDifficulty());
+        demon.setSkillsetTags(resolveSkillsetTags(request.getSkillsetTagIds()));
         return demon;
     }
 
     private DemonSummaryResponse toSummaryResponse(Demon demon) {
         DemonSummaryResponse response = new DemonSummaryResponse();
         response.setId(demon.getId());
-        response.setLevelId(demon.getLevelId());
         response.setName(demon.getLevelTitle());
         response.setPosition(demon.getPosition());
         response.setPoints(demon.getPoints());
         response.setCreator(demon.getCreatorName());
         response.setYoutubeUrl(demon.getYoutubeUrl());
+        response.setSkillsetTags(toSkillsetTagResponses(demon.getSkillsetTags()));
         return response;
     }
 
@@ -230,6 +241,44 @@ public class DemonServiceImpl extends BaseService<Demon, UUID> implements DemonS
         response.setPosition(demon.getPosition());
         response.setPoints(demon.getPoints());
         response.setDifficulty(demon.getDifficulty());
+        response.setSkillsetTags(toSkillsetTagResponses(demon.getSkillsetTags()));
+        return response;
+    }
+
+    private Set<SkillsetTag> resolveSkillsetTags(Set<UUID> skillsetTagIds) {
+        if (skillsetTagIds == null || skillsetTagIds.isEmpty()) {
+            return new LinkedHashSet<>();
+        }
+
+        if (skillsetTagIds.size() > 4) {
+            throw new DemonSkillsetTagLimitExceededException();
+        }
+
+        List<SkillsetTag> tags = skillsetTagRepository.findAllByDeletedAtIsNullAndIdIn(skillsetTagIds);
+        if (tags.size() != skillsetTagIds.size()) {
+            throw new SkillsetTagNotFoundException();
+        }
+
+        return tags.stream()
+                .sorted(java.util.Comparator.comparing(SkillsetTag::getName, String.CASE_INSENSITIVE_ORDER))
+                .collect(java.util.stream.Collectors.toCollection(LinkedHashSet::new));
+    }
+
+    private List<SkillsetTagResponse> toSkillsetTagResponses(Collection<SkillsetTag> tags) {
+        if (tags == null || tags.isEmpty()) {
+            return List.of();
+        }
+
+        return tags.stream()
+                .sorted(java.util.Comparator.comparing(SkillsetTag::getName, String.CASE_INSENSITIVE_ORDER))
+                .map(this::toSkillsetTagResponse)
+                .toList();
+    }
+
+    private SkillsetTagResponse toSkillsetTagResponse(SkillsetTag tag) {
+        SkillsetTagResponse response = new SkillsetTagResponse();
+        response.setId(tag.getId());
+        response.setName(tag.getName());
         return response;
     }
 }

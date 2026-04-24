@@ -6,8 +6,8 @@ public class RecordSubmissionCreateException extends BadRequestException {
     public RecordSubmissionCreateException(boolean isUnique) {
         super(
                 isUnique
-                        ? "Submission with the same id already exists!"
-                        : "Invalid record submission data!"
+                        ? "Вече съществува заявка със същото ID!"
+                        : "Невалидни данни за заявката!"
         );
     }
 }

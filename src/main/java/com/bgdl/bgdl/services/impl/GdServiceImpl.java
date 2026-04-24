@@ -19,7 +19,7 @@ public class GdServiceImpl implements GdService {
         String levelData = gdRequestService.getLevelById(levelId);
 
         if (levelData.equals("-1")) {
-            throw new BadRequestException("Invalid level ID");
+            throw new BadRequestException("Невалидно ID на ниво!");
         }
 
         return levelSearchResponseDeserializer.apply(levelData).get(0);

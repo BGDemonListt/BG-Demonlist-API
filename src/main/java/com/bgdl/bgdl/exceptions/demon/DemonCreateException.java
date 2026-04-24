@@ -6,8 +6,8 @@ public class DemonCreateException extends BadRequestException {
     public DemonCreateException(boolean isUnique) {
         super(
                 isUnique
-                        ? "Demon with the same id already exists!"
-                        : "Invalid dmeon data!"
+                        ? "Вече съществува демон със същото ID!"
+                        : "Невалидни данни за демона!"
         );
     }
 }

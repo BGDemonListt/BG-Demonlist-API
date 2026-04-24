@@ -13,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Set;
 import java.util.UUID;
 
 @RestController
@@ -24,9 +25,10 @@ public class DemonController {
     @GetMapping
     public ResponseEntity<PageResponse<DemonSummaryResponse>> getAll(
             @RequestParam(defaultValue = "1") int page,
-            @RequestParam(defaultValue = "") String name
+            @RequestParam(defaultValue = "") String name,
+            @RequestParam(required = false) Set<UUID> tagIds
     ) {
-        PageResponse<DemonSummaryResponse> demons = demonService.getAllDemons(name, page);
+        PageResponse<DemonSummaryResponse> demons = demonService.getAllDemons(name, tagIds, page);
         return ResponseEntity.ok(demons);
     }
 

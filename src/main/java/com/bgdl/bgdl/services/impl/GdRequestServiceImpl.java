@@ -50,7 +50,7 @@ public class GdRequestServiceImpl implements GdRequestService {
 
     private String gdRequest(String target, Map<String, String> params) {
         if (target == null || target.isBlank()) {
-            throw new InternalServerErrorException("No target provided in gd request.");
+            throw new InternalServerErrorException("Не е подадена цел за GD заявката.");
         }
 
         Map<String, String> requestParams = parseGdParams(params);

@@ -6,7 +6,11 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.*;
+
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -75,6 +79,17 @@ public class Demon extends BaseEntity {
     @NotNull
     @Enumerated(EnumType.STRING)
     private DemonDifficulty difficulty;
+
+    @Builder.Default
+    @Size(max = 4, message = "Един демон може да има най-много 4 skillset тага!")
+    @ManyToMany
+    @JoinTable(
+            name = "demon_skillset_tags",
+            joinColumns = @JoinColumn(name = "demon_id"),
+            inverseJoinColumns = @JoinColumn(name = "skillset_tag_id")
+    )
+    @OrderBy("name ASC")
+    private Set<SkillsetTag> skillsetTags = new LinkedHashSet<>();
 
     public void recalculatePoints(int totalDemons) {
         if (this.position < 1 || totalDemons < 1) {

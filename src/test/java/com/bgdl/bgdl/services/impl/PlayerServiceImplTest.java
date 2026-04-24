@@ -1,5 +1,6 @@
 package com.bgdl.bgdl.services.impl;
 
+import com.bgdl.bgdl.enums.BulgarianRegion;
 import com.bgdl.bgdl.exceptions.player.PlayerNotFoundException;
 import com.bgdl.bgdl.models.entity.Demon;
 import com.bgdl.bgdl.models.entity.Player;
@@ -85,10 +86,10 @@ class PlayerServiceImplTest {
         Player first = player(UUID.randomUUID(), "Alpha", 400.0, 1);
         Player second = player(UUID.randomUUID(), "Beta", 250.5, 2);
 
-        when(playerRepository.findLeaderboardPage(eq("alp"), any(PageRequest.class)))
+        when(playerRepository.findLeaderboardPage(eq("alp"), eq(BulgarianRegion.VARNA), any(PageRequest.class)))
                 .thenReturn(new PageImpl<>(List.of(first, second), PageRequest.of(0, 15), 2));
 
-        PageResponse<PlayerSummaryResponse> response = playerService.getPlayers("alp", 1);
+        PageResponse<PlayerSummaryResponse> response = playerService.getPlayers("alp", BulgarianRegion.VARNA, 1);
 
         assertEquals(1, response.getPage());
         assertEquals(15, response.getSize());
@@ -104,6 +105,7 @@ class PlayerServiceImplTest {
         Demon easier = demon("Easier", 1002L, 4);
 
         Player player = player(UUID.randomUUID(), "Player One", 500.0, 1);
+        player.setRegion(BulgarianRegion.PLOVDIV);
         player.setHardestDemon(hardest);
         player.setCompletedDemons(new LinkedHashSet<>(List.of(easier, hardest)));
 
@@ -112,12 +114,21 @@ class PlayerServiceImplTest {
         PlayerDetailsResponse response = playerService.getPlayerDetails(player.getId());
 
         assertEquals("Player One", response.getName());
+        assertEquals(BulgarianRegion.PLOVDIV.name(), response.getRegion().getCode());
+        assertEquals("/regions/flags/plovdiv.svg", response.getRegion().getFlagPath());
         assertEquals(500.0, response.getPoints());
         assertEquals(1, response.getPosition());
         assertEquals("Hardest", response.getHardestDemon().getLevelTitle());
         assertEquals(2, response.getCompletedDemons().size());
         assertEquals("Hardest", response.getCompletedDemons().get(0).getLevelTitle());
         assertEquals("Easier", response.getCompletedDemons().get(1).getLevelTitle());
+    }
+
+    @Test
+    void getAvailableRegionsReturnsAllBulgarianRegions() {
+        assertEquals(28, playerService.getAvailableRegions().size());
+        assertEquals(BulgarianRegion.BLAGOEVGRAD.name(), playerService.getAvailableRegions().get(0).getCode());
+        assertEquals(BulgarianRegion.YAMBOL.name(), playerService.getAvailableRegions().get(27).getCode());
     }
 
     @Test

@@ -23,7 +23,7 @@ public class WebConfig implements WebMvcConfigurer {
     public void addCorsMappings(CorsRegistry registry) {
         registry
                 .addMapping("/**") // Allow CORS for all endpoints
-                .allowedMethods("GET", "POST", "PUT", "DELETE") // Allowed HTTP methods
+                .allowedMethods("GET", "POST", "PUT", "PATCH", "DELETE") // Allowed HTTP methods
                 .allowedOrigins(frontendConfig.getBaseUrl()) // Allowed origins (frontend URL)
                 .allowCredentials(true); // Allow credentials (cookies, authorization headers)
     }

@@ -3,6 +3,7 @@ package com.bgdl.bgdl.services;
 import com.bgdl.bgdl.models.response.AdminUserResponse;
 import com.bgdl.bgdl.models.entity.DiscordProfile;
 import com.bgdl.bgdl.models.dto.auth.OAuth2UserInfoDTO;
+import com.bgdl.bgdl.models.request.ProfileUpdateRequest;
 import com.bgdl.bgdl.models.response.PublicUserResponse;
 import com.bgdl.bgdl.models.request.auth.RegisterRequest;
 import com.bgdl.bgdl.models.entity.User;
@@ -20,6 +21,8 @@ public interface UserService {
     AdminUserResponse getByIdAdmin(UUID id);
 
     AdminUserResponse updateUser(UUID id, AdminUserResponse userDTO, PublicUserResponse currentUser);
+
+    PublicUserResponse updateProfile(UUID id, ProfileUpdateRequest request, PublicUserResponse currentUser);
 
     void deleteUserById(UUID id, PublicUserResponse currentUser);
 

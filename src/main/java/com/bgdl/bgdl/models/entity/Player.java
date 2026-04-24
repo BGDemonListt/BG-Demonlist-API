@@ -1,5 +1,6 @@
 package com.bgdl.bgdl.models.entity;
 
+import com.bgdl.bgdl.enums.BulgarianRegion;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -19,6 +20,9 @@ import java.util.Set;
 public class Player extends BaseEntity {
     @Size(min = 2, message = "Името трябва да е поне 2 символа!")
     private String name;
+
+    @Enumerated(EnumType.STRING)
+    private BulgarianRegion region;
 
     @Builder.Default
     @NotNull

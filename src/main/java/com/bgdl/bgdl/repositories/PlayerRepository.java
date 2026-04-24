@@ -1,5 +1,6 @@
 package com.bgdl.bgdl.repositories;
 
+import com.bgdl.bgdl.enums.BulgarianRegion;
 import com.bgdl.bgdl.models.entity.Player;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -31,13 +32,18 @@ public interface PlayerRepository extends JpaRepository<Player, UUID> {
             FROM Player p
             WHERE p.deletedAt IS NULL
               AND LOWER(p.name) LIKE LOWER(CONCAT('%', :name, '%'))
+              AND (:region IS NULL OR p.region = :region)
             ORDER BY
               CASE WHEN p.rank IS NULL THEN 1 ELSE 0 END,
               p.rank ASC,
               p.points DESC,
               p.name ASC
             """)
-    Page<Player> findLeaderboardPage(@Param("name") String name, Pageable pageable);
+    Page<Player> findLeaderboardPage(
+            @Param("name") String name,
+            @Param("region") BulgarianRegion region,
+            Pageable pageable
+    );
 
     List<Player> findAllByDeletedAtIsNull();
 

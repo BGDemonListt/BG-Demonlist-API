@@ -1,5 +1,6 @@
 package com.bgdl.bgdl.services.impl;
 
+import com.bgdl.bgdl.enums.BulgarianRegion;
 import com.bgdl.bgdl.exceptions.player.PlayerNotFoundException;
 import com.bgdl.bgdl.models.dto.DemonBaseDTO;
 import com.bgdl.bgdl.models.entity.Demon;
@@ -8,6 +9,7 @@ import com.bgdl.bgdl.models.entity.User;
 import com.bgdl.bgdl.models.response.PageResponse;
 import com.bgdl.bgdl.models.response.PlayerDetailsResponse;
 import com.bgdl.bgdl.models.response.PlayerSummaryResponse;
+import com.bgdl.bgdl.models.response.RegionResponse;
 import com.bgdl.bgdl.repositories.PlayerRepository;
 import com.bgdl.bgdl.repositories.UserRepository;
 import com.bgdl.bgdl.services.PlayerService;
@@ -20,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Comparator;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -57,11 +60,12 @@ public class PlayerServiceImpl implements PlayerService {
 
     @Override
     @Transactional(readOnly = true)
-    public PageResponse<PlayerSummaryResponse> getPlayers(String nameFilter, int page) {
+    public PageResponse<PlayerSummaryResponse> getPlayers(String nameFilter, BulgarianRegion regionFilter, int page) {
         int sanitizedPage = Math.max(page, 1);
         Pageable pageable = PageRequest.of(sanitizedPage - 1, PLAYERS_PAGE_SIZE);
         Page<Player> playersPage = playerRepository.findLeaderboardPage(
                 nameFilter == null ? "" : nameFilter.trim(),
+                regionFilter,
                 pageable
         );
 
@@ -83,6 +87,7 @@ public class PlayerServiceImpl implements PlayerService {
         PlayerDetailsResponse response = new PlayerDetailsResponse();
         response.setId(player.getId());
         response.setName(player.getName());
+        response.setRegion(toRegionResponse(player.getRegion()));
         response.setPoints(player.getPoints());
         response.setPosition(player.getRank());
         response.setHardestDemon(toDemonBase(player.getHardestDemon()));
@@ -93,6 +98,14 @@ public class PlayerServiceImpl implements PlayerService {
                         .toList()
         );
         return response;
+    }
+
+    @Override
+    public List<RegionResponse> getAvailableRegions() {
+        return BulgarianRegion.orderedValues()
+                .stream()
+                .map(RegionResponse::from)
+                .toList();
     }
 
     private PlayerSummaryResponse toPlayerSummary(Player player) {
@@ -114,5 +127,13 @@ public class PlayerServiceImpl implements PlayerService {
         response.setLevelTitle(demon.getLevelTitle());
         response.setLevelId(demon.getLevelId());
         return response;
+    }
+
+    private RegionResponse toRegionResponse(BulgarianRegion region) {
+        if (region == null) {
+            return null;
+        }
+
+        return RegionResponse.from(region);
     }
 }

@@ -1,11 +1,13 @@
 package com.bgdl.bgdl.controllers;
 
 import com.bgdl.bgdl.models.response.AdminUserResponse;
+import com.bgdl.bgdl.models.request.ProfileUpdateRequest;
 import com.bgdl.bgdl.models.response.PublicUserResponse;
 import com.bgdl.bgdl.security.filter.JwtAuthenticationFilter;
 import com.bgdl.bgdl.services.UserService;
 import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -37,6 +39,18 @@ public class UserController {
     public ResponseEntity<AdminUserResponse> update(@PathVariable("id") UUID id, @RequestBody AdminUserResponse userDTO, HttpServletRequest httpServletRequest) {
         PublicUserResponse user = (PublicUserResponse) httpServletRequest.getAttribute(JwtAuthenticationFilter.USER_KEY);
         return ResponseEntity.ok(userService.updateUser(id, userDTO, user));
+    }
+
+    @PatchMapping("/{id}/profile")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('USER')")
+    @RateLimiter(name = "general_api_rate_limiter")
+    public ResponseEntity<PublicUserResponse> updateProfile(
+            @PathVariable("id") UUID id,
+            @Valid @RequestBody ProfileUpdateRequest request,
+            HttpServletRequest httpServletRequest
+    ) {
+        PublicUserResponse user = (PublicUserResponse) httpServletRequest.getAttribute(JwtAuthenticationFilter.USER_KEY);
+        return ResponseEntity.ok(userService.updateProfile(id, request, user));
     }
 
     @DeleteMapping("/{id}")

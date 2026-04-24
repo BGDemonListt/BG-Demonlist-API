@@ -18,7 +18,7 @@ class JwtServiceImplTest {
     private static final String SECRET_KEY = Base64.getEncoder()
             .encodeToString("01234567890123456789012345678901".getBytes(StandardCharsets.UTF_8));
 
-    private final JwtServiceImpl jwtService = new JwtServiceImpl(SECRET_KEY, 1_000L, 5_000L);
+    private final JwtServiceImpl jwtService = new JwtServiceImpl(SECRET_KEY, 60_000L, 300_000L);
 
     @Test
     void generateTokenPreservesSubjectAndCustomClaims() {

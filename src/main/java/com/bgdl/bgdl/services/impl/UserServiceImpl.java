@@ -1,12 +1,16 @@
 package com.bgdl.bgdl.services.impl;
 
+import com.bgdl.bgdl.enums.BulgarianRegion;
 import com.bgdl.bgdl.enums.Provider;
 import com.bgdl.bgdl.enums.Role;
 import com.bgdl.bgdl.exceptions.common.AccessDeniedException;
+import com.bgdl.bgdl.exceptions.common.BadRequestException;
 import com.bgdl.bgdl.exceptions.user.DiscordAccountAlreadyLinkedException;
 import com.bgdl.bgdl.exceptions.user.UserCreateException;
 import com.bgdl.bgdl.exceptions.user.UserNotFoundException;
 import com.bgdl.bgdl.exceptions.user.UserValidationException;
+import com.bgdl.bgdl.models.entity.Player;
+import com.bgdl.bgdl.models.request.ProfileUpdateRequest;
 import com.bgdl.bgdl.models.response.AdminUserResponse;
 import com.bgdl.bgdl.models.dto.auth.OAuth2UserInfoDTO;
 import com.bgdl.bgdl.models.entity.DiscordProfile;
@@ -80,6 +84,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public AdminUserResponse updateUser(UUID id, AdminUserResponse userDTO, PublicUserResponse currentUser) {
         User userToUpdate = findById(id);
         DiscordProfile currentDiscordProfile = userToUpdate.getDiscord();
@@ -90,7 +95,7 @@ public class UserServiceImpl implements UserService {
 
         if (currentUser.getRole().equals(Role.ADMIN)) {
             // It is not null it is "" so don't change it
-            if (userDTO.getPassword() == "") {
+            if (userDTO.getPassword() == null || userDTO.getPassword().isEmpty()) {
                 userDTO.setPassword(userToUpdate.getPassword());
             } else {
                 userDTO.setPassword(passwordEncoder.encode(userDTO.getPassword()));
@@ -98,12 +103,29 @@ public class UserServiceImpl implements UserService {
 
             modelMapper.map(userDTO, userToUpdate);
             userToUpdate.setDiscord(currentDiscordProfile);
+            syncPlayerName(userToUpdate, userDTO.getName());
+        } else {
+            updateProfileFields(userToUpdate, userDTO.getName(), null);
         }
 
         userToUpdate.setId(id);
 
         User updatedUser = userRepository.save(userToUpdate);
         return toAdminUserResponse(updatedUser);
+    }
+
+    @Override
+    @Transactional
+    public PublicUserResponse updateProfile(UUID id, ProfileUpdateRequest request, PublicUserResponse currentUser) {
+        User userToUpdate = findById(id);
+
+        if (!(userToUpdate.getId().equals(currentUser.getId())) && !currentUser.getRole().equals(Role.ADMIN)) {
+            throw new AccessDeniedException();
+        }
+
+        updateProfileFields(userToUpdate, request.getName(), request.getRegion());
+
+        return toPublicUserResponse(userRepository.save(userToUpdate));
     }
 
 
@@ -182,6 +204,34 @@ public class UserServiceImpl implements UserService {
         AdminUserResponse response = modelMapper.map(user, AdminUserResponse.class);
         response.setPlayerId(user.getPlayer() != null ? user.getPlayer().getId() : null);
         return response;
+    }
+
+    private void updateProfileFields(User user, String name, BulgarianRegion region) {
+        Player player = user.getPlayer();
+
+        if (player == null) {
+            throw new BadRequestException("Профилът няма свързан играч!");
+        }
+
+        if (name != null) {
+            String trimmedName = name.trim();
+            if (trimmedName.length() < 2) {
+                throw new BadRequestException("Името трябва да е поне 2 символа!");
+            }
+
+            user.setName(trimmedName);
+            player.setName(trimmedName);
+        }
+
+        if (region != null) {
+            player.setRegion(region);
+        }
+    }
+
+    private void syncPlayerName(User user, String name) {
+        if (user.getPlayer() != null && name != null) {
+            user.getPlayer().setName(name.trim());
+        }
     }
 
     @Override

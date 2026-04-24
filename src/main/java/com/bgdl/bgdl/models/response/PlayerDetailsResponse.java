@@ -10,6 +10,7 @@ import java.util.UUID;
 public class PlayerDetailsResponse {
     private UUID id;
     private String name;
+    private RegionResponse region;
     private Double points;
     private Integer position;
     private DemonBaseDTO hardestDemon;

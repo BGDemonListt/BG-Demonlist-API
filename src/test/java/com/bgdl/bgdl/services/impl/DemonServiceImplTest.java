@@ -21,6 +21,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.domain.Specification;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -29,6 +30,7 @@ import java.util.Set;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -161,6 +163,32 @@ class DemonServiceImplTest {
         verify(demonRepository).save(toDelete);
         assertTrue(toDelete.getDeletedAt() != null);
         verify(demonRepository).saveAll(anyList());
+        verify(leaderboardService).requestRebuild();
+    }
+
+    @Test
+    void deleteRestoresDemonAtStoredPositionAndRequestsLeaderboardRebuild() {
+        Demon restored = demon("Restored", 333L, 2, 150.0);
+        restored.setDeletedAt(LocalDateTime.now());
+        Demon remaining = demon("Remaining", 111L, 1, 323.0);
+
+        when(demonRepository.findById(restored.getId())).thenReturn(Optional.of(restored));
+        when(demonRepository.save(any(Demon.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(demonRepository.findAllByDeletedAtIsNullOrderByPositionAsc())
+                .thenReturn(new ArrayList<>(List.of(remaining, restored)));
+        when(demonRepository.saveAll(anyList())).thenAnswer(invocation -> invocation.getArgument(0));
+
+        demonService.delete(restored.getId());
+
+        ArgumentCaptor<List<Demon>> captor = ArgumentCaptor.forClass(List.class);
+        verify(demonRepository).saveAll(captor.capture());
+        List<Demon> savedDemons = captor.getValue();
+
+        assertNull(restored.getDeletedAt());
+        assertEquals(remaining.getId(), savedDemons.get(0).getId());
+        assertEquals(restored.getId(), savedDemons.get(1).getId());
+        assertEquals(1, savedDemons.get(0).getPosition());
+        assertEquals(2, savedDemons.get(1).getPosition());
         verify(leaderboardService).requestRebuild();
     }
 

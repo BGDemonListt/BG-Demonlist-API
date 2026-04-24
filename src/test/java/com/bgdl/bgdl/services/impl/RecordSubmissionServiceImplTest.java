@@ -16,11 +16,13 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -140,6 +142,22 @@ class RecordSubmissionServiceImplTest {
 
         recordSubmissionService.delete(submissionId);
 
+        verify(recordSubmissionRepository).save(submission);
+        verify(leaderboardService).requestRebuild();
+    }
+
+    @Test
+    void deleteRequestsLeaderboardRebuildWhenAcceptedSubmissionIsRestored() {
+        UUID submissionId = UUID.randomUUID();
+        RecordSubmission submission = submission(submissionId, RecordSubmissionStatus.ACCEPTED);
+        submission.setDeletedAt(LocalDateTime.now());
+
+        when(recordSubmissionRepository.findById(submissionId)).thenReturn(Optional.of(submission));
+        when(recordSubmissionRepository.save(any(RecordSubmission.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        recordSubmissionService.delete(submissionId);
+
+        assertNull(submission.getDeletedAt());
         verify(recordSubmissionRepository).save(submission);
         verify(leaderboardService).requestRebuild();
     }

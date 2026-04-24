@@ -4,6 +4,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
+import org.springframework.transaction.support.TransactionSynchronizationUtils;
 
 import java.util.ArrayList;
 import java.util.ArrayDeque;
@@ -17,8 +20,10 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -40,6 +45,35 @@ class LeaderboardRebuildQueueTest {
         scheduledTasks.remove().run();
 
         verify(leaderboardRebuildWorker, times(1)).rebuildLeaderboard();
+    }
+
+    @Test
+    void defersRebuildUntilTransactionCommit() {
+        Queue<Runnable> scheduledTasks = new ArrayDeque<>();
+        Executor executor = scheduledTasks::add;
+        LeaderboardRebuildQueue queue = new LeaderboardRebuildQueue(leaderboardRebuildWorker, executor);
+
+        TransactionSynchronizationManager.initSynchronization();
+        TransactionSynchronizationManager.setActualTransactionActive(true);
+
+        try {
+            queue.requestRebuild();
+
+            assertTrue(scheduledTasks.isEmpty());
+            verify(leaderboardRebuildWorker, never()).rebuildLeaderboard();
+
+            TransactionSynchronizationManager.setActualTransactionActive(false);
+            TransactionSynchronizationUtils.triggerAfterCommit();
+            TransactionSynchronizationUtils.triggerAfterCompletion(TransactionSynchronization.STATUS_COMMITTED);
+
+            assertEquals(1, scheduledTasks.size());
+            scheduledTasks.remove().run();
+
+            verify(leaderboardRebuildWorker, times(1)).rebuildLeaderboard();
+        } finally {
+            TransactionSynchronizationManager.setActualTransactionActive(false);
+            TransactionSynchronizationManager.clearSynchronization();
+        }
     }
 
     @Test

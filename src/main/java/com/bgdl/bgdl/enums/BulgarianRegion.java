@@ -23,14 +23,13 @@ public enum BulgarianRegion {
     SILISTRA("Silistra", "/regions/flags/silistra.png"),
     SLIVEN("Sliven", "/regions/flags/sliven.png"),
     SMOLYAN("Smolyan", "/regions/flags/smolyan.png"),
-    SOFIA_CITY("Sofia City", "/regions/flags/sofia-city.png"),
-    SOFIA_PROVINCE("Sofia Province", "/regions/flags/sofia-province.png"),
-    STARA_ZAGORA("Stara Zagora", "/regions/flags/stara-zagora.png"),
+    SOFIA("Sofia", "/regions/flags/sofia.png"),
+    STARA_ZAGORA("Stara Zagora", "/regions/flags/stara_zagora.png"),
     TARGOVISHTE("Targovishte", "/regions/flags/targovishte.png"),
     VARNA("Varna", "/regions/flags/varna.png"),
-    VELIKO_TARNOVO("Veliko Tarnovo", "/regions/flags/veliko-tarnovo.png"),
+    VELIKO_TARNOVO("Veliko Tarnovo", "/regions/flags/veliko_tarnovo.png"),
     VIDIN("Vidin", "/regions/flags/vidin.png"),
-    VRATSA("Vratsa", "/regions/flags/vratsa.png"),
+    VRATSA("Vratsa", "/regions/flags/vratza.png"),
     YAMBOL("Yambol", "/regions/flags/yambol.png");
 
     private final String displayName;

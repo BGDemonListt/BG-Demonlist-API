@@ -126,9 +126,9 @@ class PlayerServiceImplTest {
 
     @Test
     void getAvailableRegionsReturnsAllBulgarianRegions() {
-        assertEquals(28, playerService.getAvailableRegions().size());
+        assertEquals(27, playerService.getAvailableRegions().size());
         assertEquals(BulgarianRegion.BLAGOEVGRAD.name(), playerService.getAvailableRegions().get(0).getCode());
-        assertEquals(BulgarianRegion.YAMBOL.name(), playerService.getAvailableRegions().get(27).getCode());
+        assertEquals(BulgarianRegion.YAMBOL.name(), playerService.getAvailableRegions().get(26).getCode());
     }
 
     @Test

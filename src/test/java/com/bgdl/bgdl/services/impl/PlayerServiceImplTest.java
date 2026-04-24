@@ -115,7 +115,7 @@ class PlayerServiceImplTest {
 
         assertEquals("Player One", response.getName());
         assertEquals(BulgarianRegion.PLOVDIV.name(), response.getRegion().getCode());
-        assertEquals("/regions/flags/plovdiv.svg", response.getRegion().getFlagPath());
+        assertEquals("/regions/flags/plovdiv.png", response.getRegion().getFlagPath());
         assertEquals(500.0, response.getPoints());
         assertEquals(1, response.getPosition());
         assertEquals("Hardest", response.getHardestDemon().getLevelTitle());

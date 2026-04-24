@@ -1,0 +1,496 @@
+{
+  "info": {
+    "_postman_id": "2b4dd4ba-c3fd-4dd1-9c8f-bf36f49d4e4b",
+    "name": "BGDL API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Postman collection for the BG Demonlist API."
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8080" },
+    { "key": "accessToken", "value": "" },
+    { "key": "refreshToken", "value": "" },
+    { "key": "userId", "value": "00000000-0000-0000-0000-000000000001" },
+    { "key": "playerId", "value": "00000000-0000-0000-0000-000000000002" },
+    { "key": "playerRegion", "value": "VARNA" },
+    { "key": "filePath", "value": "regions/flags/targovishte.png" },
+    { "key": "demonId", "value": "00000000-0000-0000-0000-000000000003" },
+    { "key": "skillsetTagId", "value": "00000000-0000-0000-0000-000000000005" },
+    { "key": "skillsetTagIdSecond", "value": "00000000-0000-0000-0000-000000000006" },
+    { "key": "recordId", "value": "00000000-0000-0000-0000-000000000004" },
+    { "key": "verificationToken", "value": "replace-me" },
+    { "key": "passwordResetToken", "value": "replace-me" },
+    { "key": "googleCode", "value": "replace-me" },
+    { "key": "discordCode", "value": "replace-me" },
+    { "key": "discordState", "value": "replace-me" },
+    { "key": "demonLevelId", "value": "12345678" },
+    { "key": "gdLevelId", "value": "12345678" }
+  ],
+  "item": [
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"player@example.com\",\n  \"password\": \"mypassword123\",\n  \"name\": \"Player One\",\n  \"role\": \"USER\",\n  \"provider\": \"LOCAL\"\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/auth/register"
+          }
+        },
+        {
+          "name": "Confirm Registration",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/registrationConfirm?token={{verificationToken}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "auth", "registrationConfirm"],
+              "query": [
+                { "key": "token", "value": "{{verificationToken}}" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Authenticate",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"nipecak871@httpsu.com\",\n  \"password\": \"mypassword123\"\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/auth/authenticate"
+          }
+        },
+        {
+          "name": "Refresh Token",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/v1/auth/refresh-token/{{refreshToken}}"
+          }
+        },
+        {
+          "name": "Get Me",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "url": "{{baseUrl}}/api/v1/auth/me"
+          }
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "url": "{{baseUrl}}/api/v1/auth/logout"
+          }
+        },
+        {
+          "name": "Forgot Password",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/forgot-password?email=player@example.com",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "auth", "forgot-password"],
+              "query": [
+                { "key": "email", "value": "player@example.com" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Reset Password",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/password-reset?token={{passwordResetToken}}&newPassword=newStrongPassword123",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "auth", "password-reset"],
+              "query": [
+                { "key": "token", "value": "{{passwordResetToken}}" },
+                { "key": "newPassword", "value": "newStrongPassword123" }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "OAuth2",
+      "item": [
+        {
+          "name": "Get Google OAuth URL",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/v1/oauth2/url/google"
+          }
+        },
+        {
+          "name": "Authenticate With Google",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/oauth2/authenticate/google?code={{googleCode}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "oauth2", "authenticate", "google"],
+              "query": [
+                { "key": "code", "value": "{{googleCode}}" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Discord Link URL",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "url": "{{baseUrl}}/api/v1/oauth2/url/discord/link"
+          }
+        },
+        {
+          "name": "Link Discord Account",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/oauth2/link/discord?code={{discordCode}}&state={{discordState}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "oauth2", "link", "discord"],
+              "query": [
+                { "key": "code", "value": "{{discordCode}}" },
+                { "key": "state", "value": "{{discordState}}" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Unlink Discord Account",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "url": "{{baseUrl}}/api/v1/oauth2/link/discord"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Users",
+      "item": [
+        {
+          "name": "Get All Users",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "url": "{{baseUrl}}/api/v1/users/all"
+          }
+        },
+        {
+          "name": "Get Admin User By Id",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "url": "{{baseUrl}}/api/v1/users/{{userId}}/admin"
+          }
+        },
+        {
+          "name": "Update User",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Player One Updated\",\n  \"email\": \"player@example.com\",\n  \"password\": \"\",\n  \"role\": \"USER\",\n  \"enabled\": true\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/users/{{userId}}"
+          }
+        },
+        {
+          "name": "Update Profile",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Player One Updated\",\n  \"region\": \"{{playerRegion}}\"\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/users/{{userId}}/profile"
+          }
+        },
+        {
+          "name": "Delete User",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "url": "{{baseUrl}}/api/v1/users/{{userId}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Demons",
+      "item": [
+        {
+          "name": "Get All Demons",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/demons?page=1&name=&tagIds={{skillsetTagId}}&tagIds={{skillsetTagIdSecond}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "demons"],
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "name", "value": "" },
+                { "key": "tagIds", "value": "{{skillsetTagId}}" },
+                { "key": "tagIds", "value": "{{skillsetTagIdSecond}}" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Demon By Level Id",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/v1/demons/{{demonLevelId}}"
+          }
+        },
+        {
+          "name": "Create Demon",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"levelTitle\": \"New Extreme\",\n  \"levelId\": 12345678,\n  \"creatorName\": \"Creator\",\n  \"creatorId\": 54321,\n  \"description\": \"Fresh addition to the list\",\n  \"levelPassword\": \"copyable\",\n  \"youtubeUrl\": \"https://youtube.com/watch?v=new-extreme\",\n  \"musicName\": \"Song Name\",\n  \"musicId\": 456789,\n  \"musicCreatorName\": \"Artist\",\n  \"musicUrl\": \"https://example.com/song\",\n  \"requirement\": 100,\n  \"position\": 1,\n  \"difficulty\": \"EXTREME\",\n  \"skillsetTagIds\": [\n    \"{{skillsetTagId}}\",\n    \"{{skillsetTagIdSecond}}\"\n  ]\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/demons"
+          }
+        },
+        {
+          "name": "Update Demon",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"levelTitle\": \"Updated Extreme\",\n  \"levelId\": 12345678,\n  \"creatorName\": \"Creator\",\n  \"creatorId\": 54321,\n  \"description\": \"Updated list placement\",\n  \"levelPassword\": \"copyable\",\n  \"youtubeUrl\": \"https://youtube.com/watch?v=updated-extreme\",\n  \"musicName\": \"Song Name\",\n  \"musicId\": 456789,\n  \"musicCreatorName\": \"Artist\",\n  \"musicUrl\": \"https://example.com/song\",\n  \"requirement\": 100,\n  \"position\": 2,\n  \"difficulty\": \"EXTREME\",\n  \"skillsetTagIds\": [\n    \"{{skillsetTagId}}\"\n  ]\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/demons/{{demonLevelId}}"
+          }
+        },
+        {
+          "name": "Delete Demon",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "url": "{{baseUrl}}/api/v1/demons/{{demonId}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Skillset Tags",
+      "item": [
+        {
+          "name": "Get All Skillset Tags",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/v1/skillset-tags"
+          }
+        },
+        {
+          "name": "Create Skillset Tag",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Wave\"\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/skillset-tags"
+          }
+        },
+        {
+          "name": "Update Skillset Tag",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Wave Control\"\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/skillset-tags/{{skillsetTagId}}"
+          }
+        },
+        {
+          "name": "Delete Skillset Tag",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "url": "{{baseUrl}}/api/v1/skillset-tags/{{skillsetTagId}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Files",
+      "item": [
+        {
+          "name": "Get File",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/files/{{filePath}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Players",
+      "item": [
+        {
+          "name": "Get Player Regions",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/v1/players/regions"
+          }
+        },
+        {
+          "name": "Get Players Page",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/players?page=1&name=pla&region={{playerRegion}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "players"],
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "name", "value": "pla" },
+                { "key": "region", "value": "{{playerRegion}}" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Player Details",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/v1/players/{{playerId}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Record Submissions",
+      "item": [
+        {
+          "name": "Get All Records",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "url": "{{baseUrl}}/api/v1/records"
+          }
+        },
+        {
+          "name": "Create Record Submission",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"playerId\": \"{{playerId}}\",\n  \"demonId\": \"{{demonId}}\",\n  \"progress\": 100,\n  \"youtubeUrl\": \"https://youtube.com/watch?v=example\",\n  \"rawFootageUrl\": \"https://drive.google.com/file/example\",\n  \"description\": \"Clean completion\"\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/records"
+          }
+        },
+        {
+          "name": "Moderate Record Submission",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": \"{{recordId}}\",\n  \"status\": \"ACCEPTED\"\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/records"
+          }
+        },
+        {
+          "name": "Delete Record Submission",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "url": "{{baseUrl}}/api/v1/records/{{recordId}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Geometry Dash",
+      "item": [
+        {
+          "name": "Get GD Level By Id",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/gd/api/{{gdLevelId}}"
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -168,7 +168,7 @@ Use this checklist when validating new backend changes locally. It is written ar
 
 ## Authorization Checks
 
-1. Without an admin token, call:
+1. Without admin auth cookies, call:
    - `Create Demon`
    - `Update Demon`
    - `Delete Demon`

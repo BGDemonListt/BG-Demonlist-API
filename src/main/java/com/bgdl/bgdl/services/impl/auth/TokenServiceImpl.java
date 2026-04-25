@@ -1,7 +1,7 @@
 package com.bgdl.bgdl.services.impl.auth;
 
 import com.bgdl.bgdl.enums.TokenType;
-import com.bgdl.bgdl.models.response.auth.AuthenticationResponse;
+import com.bgdl.bgdl.models.dto.auth.AuthenticationSession;
 import com.bgdl.bgdl.models.response.PublicUserResponse;
 import com.bgdl.bgdl.models.entity.Token;
 import com.bgdl.bgdl.models.entity.User;
@@ -77,7 +77,7 @@ public class TokenServiceImpl implements TokenService {
     }
 
     @Override
-    public AuthenticationResponse generateAuthResponse(User user) {
+    public AuthenticationSession generateAuthenticationSession(User user) {
         String jwtToken = jwtService.generateToken(user);
         String refreshToken = jwtService.generateRefreshToken(user);
         PublicUserResponse publicUser = userService.toPublicUserResponse(user);
@@ -85,7 +85,7 @@ public class TokenServiceImpl implements TokenService {
         saveToken(user, jwtToken, TokenType.ACCESS);
         saveToken(user, refreshToken, TokenType.REFRESH);
 
-        return AuthenticationResponse
+        return AuthenticationSession
                 .builder()
                 .accessToken(jwtToken)
                 .refreshToken(refreshToken)

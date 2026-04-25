@@ -1,10 +1,10 @@
 package com.bgdl.bgdl.services.impl.auth;
 
 import com.bgdl.bgdl.enums.TokenType;
+import com.bgdl.bgdl.models.dto.auth.AuthenticationSession;
 import com.bgdl.bgdl.models.entity.Player;
 import com.bgdl.bgdl.models.entity.Token;
 import com.bgdl.bgdl.models.entity.User;
-import com.bgdl.bgdl.models.response.auth.AuthenticationResponse;
 import com.bgdl.bgdl.models.response.PublicUserResponse;
 import com.bgdl.bgdl.repositories.TokenRepository;
 import com.bgdl.bgdl.repositories.VerificationTokenRepository;
@@ -43,7 +43,7 @@ class TokenServiceImplTest {
     private TokenServiceImpl tokenService;
 
     @Test
-    void generateAuthResponseCopiesPlayerIdIntoPublicUserResponse() {
+    void generateAuthenticationSessionCopiesPlayerIdIntoPublicUserResponse() {
         UUID userId = UUID.randomUUID();
         UUID playerId = UUID.randomUUID();
 
@@ -61,7 +61,7 @@ class TokenServiceImplTest {
         when(userService.toPublicUserResponse(user)).thenReturn(publicUserResponse);
         when(tokenRepository.save(any(Token.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        AuthenticationResponse response = tokenService.generateAuthResponse(user);
+        AuthenticationSession response = tokenService.generateAuthenticationSession(user);
 
         assertEquals("access-token", response.getAccessToken());
         assertEquals("refresh-token", response.getRefreshToken());

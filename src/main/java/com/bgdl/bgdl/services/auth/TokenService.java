@@ -1,7 +1,7 @@
 package com.bgdl.bgdl.services.auth;
 
 import com.bgdl.bgdl.enums.TokenType;
-import com.bgdl.bgdl.models.response.auth.AuthenticationResponse;
+import com.bgdl.bgdl.models.dto.auth.AuthenticationSession;
 import com.bgdl.bgdl.models.entity.Token;
 import com.bgdl.bgdl.models.entity.User;
 
@@ -20,7 +20,7 @@ public interface TokenService {
 
     void logoutToken(String jwt);
 
-    AuthenticationResponse generateAuthResponse(User user);
+    AuthenticationSession generateAuthenticationSession(User user);
 
     void createVerificationToken(User user, String token);
 

@@ -74,6 +74,18 @@ spring:
               enable: true
             timeout: 8000
 application:
+  security:
+    cookies:
+      secure: ${AUTH_COOKIE_SECURE:false}
+      http-only: true
+      same-site: ${AUTH_COOKIE_SAME_SITE:Lax}
+      domain: ${AUTH_COOKIE_DOMAIN:}
+      access-token:
+        name: BGDL_ACCESS_TOKEN
+        path: /
+      refresh-token:
+        name: BGDL_REFRESH_TOKEN
+        path: /api/v1/auth
   oauth2:
     discord:
       clientId: ${DISCORD_CLIENT_ID}

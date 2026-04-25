@@ -7,6 +7,7 @@ import com.bgdl.bgdl.exceptions.token.ExpiredTokenException;
 import com.bgdl.bgdl.exceptions.token.InvalidTokenException;
 import com.bgdl.bgdl.exceptions.user.UserLoginException;
 import com.bgdl.bgdl.exceptions.user.UserNotFoundException;
+import com.bgdl.bgdl.models.dto.auth.AuthenticationSession;
 import com.bgdl.bgdl.models.request.auth.AuthenticationRequest;
 import com.bgdl.bgdl.models.response.auth.AuthenticationResponse;
 import com.bgdl.bgdl.models.response.PublicUserResponse;
@@ -35,7 +36,6 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.Calendar;
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -55,16 +55,16 @@ public class AuthenticationServiceImpl implements AuthenticationService {
      * Registers a new user based on the provided registration request.
      */
     @Override
-    public AuthenticationResponse register(RegisterRequest request) {
+    public AuthenticationSession register(RegisterRequest request) {
         User user = userService.createUser(request);
         eventPublisher.publishEvent(new OnRegistrationCompleteEvent(user));
 
-        return tokenService.generateAuthResponse(user);
+        return tokenService.generateAuthenticationSession(user);
     }
 
     // Login with correct email and password
     @Override
-    public AuthenticationResponse authenticate(AuthenticationRequest request) {
+    public AuthenticationSession authenticate(AuthenticationRequest request) {
         User user;
 
         try {
@@ -87,17 +87,14 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         }
 
         tokenService.revokeAllUserTokens(user);
-        return tokenService.generateAuthResponse(user);
+        return tokenService.generateAuthenticationSession(user);
     }
 
     /**
-     * Generates a new access token and updates the refresh token based on the provided refresh token.
-     * If the refresh token is missing or invalid, it throws an InvalidTokenException.
-     * If the refresh token is valid, it generates a new access token, revokes all existing user tokens,
-     * and updates the refresh token to the provided one.
+     * Validates the refresh token currently stored in the cookie and rotates the token pair.
      */
     @Override
-    public AuthenticationResponse refreshToken(String refreshToken) {
+    public AuthenticationSession refreshToken(String refreshToken) {
         if (refreshToken == null || refreshToken.isEmpty()) {
             throw new InvalidTokenException();
         }
@@ -114,37 +111,28 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             throw new InvalidTokenException();
         }
 
-        // Make sure token is a refresh token not access token
         Token token = tokenService.findByToken(refreshToken);
-        if (token != null && token.tokenType != TokenType.REFRESH) {
+        if (token == null || token.getTokenType() != TokenType.REFRESH) {
             throw new InvalidTokenException();
         }
 
-        User user = userService.findByEmail(userEmail);
+        User user = token.getUser();
+
+        if (user == null || !userEmail.equals(user.getEmail())) {
+            throw new InvalidTokenException();
+        }
 
         if (!jwtService.isTokenValid(refreshToken, user)) {
             tokenService.revokeToken(token);
             throw new InvalidTokenException();
         }
 
-        String accessToken = jwtService.generateToken(user);
-
         tokenService.revokeAllUserTokens(user);
-        tokenService.saveToken(user, accessToken, TokenType.ACCESS);
-        tokenService.saveToken(user, refreshToken, TokenType.REFRESH);
-
-        return AuthenticationResponse
-                .builder()
-                .accessToken(accessToken)
-                .refreshToken(refreshToken)
-                .build();
+        return tokenService.generateAuthenticationSession(user);
     }
 
     /**
-     * Retrieves user information based on the provided JWT token.
-     * If the token is invalid or missing, it throws an InvalidTokenException.
-     * If the token is valid, it retrieves the user's access and refresh tokens, updates the refresh token if necessary,
-     * and returns an authentication response containing the user's information and tokens.
+     * Retrieves the current user from the access token carried by the request cookie.
      */
     @Override
     public AuthenticationResponse me(String jwtToken) {
@@ -154,7 +142,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
         Token accessToken = tokenService.findByToken(jwtToken);
 
-        if (accessToken == null) {
+        if (accessToken == null || accessToken.getTokenType() != TokenType.ACCESS) {
             throw new InvalidTokenException();
         }
 
@@ -173,34 +161,10 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             throw new InvalidTokenException();
         }
 
-        List<Token> tokens = tokenService.findByUser(user);
-        List<Token> refreshTokens = tokens.stream().filter(x -> x.getTokenType() == TokenType.REFRESH).toList();
-
-        if (refreshTokens.isEmpty()) {
-            throw new InvalidTokenException();
-        }
-
-        Token refreshToken = refreshTokens.get(0);
-
-        if (refreshToken == null) {
-            throw new InvalidTokenException();
-        }
-
-        String refreshTokenString;
-
-        if (!jwtService.isTokenValid(refreshToken.getToken(), user)) {
-            refreshTokenString = jwtService.generateRefreshToken(user);
-            tokenService.saveToken(user, refreshTokenString, TokenType.REFRESH);
-        } else {
-            refreshTokenString = refreshToken.getToken();
-        }
-
         PublicUserResponse publicUser = userService.toPublicUserResponse(user);
 
         return AuthenticationResponse
                 .builder()
-                .accessToken(accessToken.getToken())
-                .refreshToken(refreshTokenString)
                 .user(publicUser)
                 .build();
     }

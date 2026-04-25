@@ -5,12 +5,12 @@ import com.bgdl.bgdl.config.FrontendConfig;
 import com.bgdl.bgdl.enums.Provider;
 import com.bgdl.bgdl.exceptions.token.InvalidTokenException;
 import com.bgdl.bgdl.exceptions.user.InvalidDiscordAuthorizationException;
+import com.bgdl.bgdl.models.dto.auth.AuthenticationSession;
 import com.bgdl.bgdl.models.dto.auth.DiscordTokenResponse;
 import com.bgdl.bgdl.models.dto.auth.DiscordUserInfoDTO;
 import com.bgdl.bgdl.models.dto.auth.OAuth2UserInfoDTO;
 import com.bgdl.bgdl.models.entity.DiscordProfile;
 import com.bgdl.bgdl.models.entity.User;
-import com.bgdl.bgdl.models.response.auth.AuthenticationResponse;
 import com.bgdl.bgdl.models.response.PublicUserResponse;
 import com.bgdl.bgdl.services.auth.OAuth2AuthenticationService;
 import com.bgdl.bgdl.services.PlayerService;
@@ -67,7 +67,7 @@ public class OAuth2AuthenticationServiceImpl implements OAuth2AuthenticationServ
     }
 
     @Override
-    public AuthenticationResponse processOAuthGoogleLogin(String code) {
+    public AuthenticationSession processOAuthGoogleLogin(String code) {
         String token = authorizeWithGoogle(code);
         OAuth2UserInfoDTO oAuth2UserInfoDTO = getUserInfoFromGoogleToken(token);
         oAuth2UserInfoDTO.setProvider(Provider.GOOGLE);
@@ -77,7 +77,7 @@ public class OAuth2AuthenticationServiceImpl implements OAuth2AuthenticationServ
         tokenService.revokeAllUserTokens(user);
 
         userService.enableUser(user);
-        return tokenService.generateAuthResponse(user);
+        return tokenService.generateAuthenticationSession(user);
     }
 
     @Override

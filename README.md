@@ -90,10 +90,12 @@ The API starts on `http://localhost:8080` by default.
 - `POST /api/v1/auth/register`
 - `GET /api/v1/auth/registrationConfirm?token=...`
 - `POST /api/v1/auth/authenticate`
-- `GET /api/v1/auth/refresh-token/{refreshToken}`
+- `POST /api/v1/auth/refresh-token`
 - `GET /api/v1/auth/me`
 - `POST /api/v1/auth/forgot-password?email=...`
 - `POST /api/v1/auth/password-reset?token=...&newPassword=...`
+
+Authentication endpoints set `HttpOnly` auth cookies for the access token and refresh token. Authenticated browser requests should be sent with credentials enabled so the API receives cookies instead of an `Authorization` bearer header.
 
 ### OAuth2 and account linking
 

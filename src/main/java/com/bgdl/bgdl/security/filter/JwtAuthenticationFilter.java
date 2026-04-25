@@ -3,6 +3,7 @@ package com.bgdl.bgdl.security.filter;
 import com.bgdl.bgdl.exceptions.user.UserNotFoundException;
 import com.bgdl.bgdl.models.entity.User;
 import com.bgdl.bgdl.repositories.TokenRepository;
+import com.bgdl.bgdl.security.cookies.AuthCookieService;
 import com.bgdl.bgdl.services.auth.JwtService;
 import com.bgdl.bgdl.services.UserService;
 import jakarta.servlet.FilterChain;
@@ -34,6 +35,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     public static final String USER_KEY = "user";
     public static final String JWT_KEY = "jwt";
 
+    private final AuthCookieService authCookieService;
     private final JwtService jwtService;
     private final UserService userService;
     private final TokenRepository tokenRepository;
@@ -47,15 +49,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         request.setAttribute(USER_KEY, null);
         request.setAttribute(JWT_KEY, null);
 
-        final String authHeader = request.getHeader("Authorization");
+        final String jwt = authCookieService.extractAccessToken(request);
 
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            filterChain.doFilter(request, response);
-            return;
-        }
-
-        final String jwt = authHeader.substring(7);
-        if (jwt.isEmpty()) {
+        if (jwt == null) {
             filterChain.doFilter(request, response);
             return;
         }

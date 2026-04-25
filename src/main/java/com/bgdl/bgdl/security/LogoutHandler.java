@@ -1,16 +1,13 @@
 package com.bgdl.bgdl.security;
 
-import com.bgdl.bgdl.exceptions.token.InvalidTokenException;
 import com.bgdl.bgdl.services.auth.TokenService;
-import com.bgdl.bgdl.utils.ObjectMapperHelper;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.bgdl.bgdl.security.cookies.AuthCookieService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-
-import java.io.IOException;
 
 
 /**
@@ -21,11 +18,10 @@ import java.io.IOException;
 public class LogoutHandler implements org.springframework.security.web.authentication.logout.LogoutHandler {
 
     private final TokenService tokenService;
-    private final ObjectMapper objectMapper;
+    private final AuthCookieService authCookieService;
 
     /**
      * Performs user logout by invalidating the JWT token and removing associated cookies.
-     * If the token is invalid or missing, it sends a standardized error response back to the client.
      */
     @Override
     public void logout(
@@ -33,18 +29,19 @@ public class LogoutHandler implements org.springframework.security.web.authentic
             HttpServletResponse response,
             Authentication authentication
     ) {
-        final String authHeader = request.getHeader("Authorization");
+        authCookieService.clearAuthenticationCookies(response);
 
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            try {
-                ObjectMapperHelper.writeExceptionToObjectMapper(objectMapper, new InvalidTokenException(), response);
-                return;
-            } catch (IOException exception) {
-                return;
-            }
+        String jwt = authCookieService.extractAccessToken(request);
+
+        if (jwt == null) {
+            jwt = authCookieService.extractRefreshToken(request);
         }
 
-        final String jwt = authHeader.substring(7);
-        tokenService.logoutToken(jwt);
+        if (jwt != null) {
+            tokenService.logoutToken(jwt);
+            return;
+        }
+
+        SecurityContextHolder.clearContext();
     }
 }

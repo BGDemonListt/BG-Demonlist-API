@@ -8,6 +8,7 @@ import com.bgdl.bgdl.exceptions.token.ExpiredTokenException;
 import com.bgdl.bgdl.exceptions.token.InvalidTokenException;
 import com.bgdl.bgdl.exceptions.user.UserLoginException;
 import com.bgdl.bgdl.exceptions.user.UserNotFoundException;
+import com.bgdl.bgdl.models.dto.auth.AuthenticationSession;
 import com.bgdl.bgdl.models.entity.Token;
 import com.bgdl.bgdl.models.entity.User;
 import com.bgdl.bgdl.models.entity.VerificationToken;
@@ -34,14 +35,12 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.LocalDateTime;
 import java.util.Date;
-import java.util.List;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -113,7 +112,7 @@ class AuthenticationServiceImplTest {
         assertThrows(EmailNotVerified.class, () -> authenticationService.authenticate(request));
 
         verify(tokenService, never()).revokeAllUserTokens(any());
-        verify(tokenService, never()).generateAuthResponse(any());
+        verify(tokenService, never()).generateAuthenticationSession(any());
     }
 
     @Test
@@ -123,20 +122,20 @@ class AuthenticationServiceImplTest {
                 .password("secret")
                 .build();
         User user = user("user@example.com");
-        AuthenticationResponse response = AuthenticationResponse.builder()
+        AuthenticationSession response = AuthenticationSession.builder()
                 .accessToken("access-token")
                 .refreshToken("refresh-token")
                 .build();
 
         when(userService.findByEmail(request.getEmail())).thenReturn(user);
         when(authenticationManager.authenticate(any())).thenReturn(mock(Authentication.class));
-        when(tokenService.generateAuthResponse(user)).thenReturn(response);
+        when(tokenService.generateAuthenticationSession(user)).thenReturn(response);
 
-        AuthenticationResponse result = authenticationService.authenticate(request);
+        AuthenticationSession result = authenticationService.authenticate(request);
 
         assertSame(response, result);
         verify(tokenService).revokeAllUserTokens(user);
-        verify(tokenService).generateAuthResponse(user);
+        verify(tokenService).generateAuthenticationSession(user);
     }
 
     @Test
@@ -160,7 +159,6 @@ class AuthenticationServiceImplTest {
 
         when(jwtService.extractUsername(refreshToken)).thenReturn(user.getEmail());
         when(tokenService.findByToken(refreshToken)).thenReturn(storedToken);
-        when(userService.findByEmail(user.getEmail())).thenReturn(user);
         when(jwtService.isTokenValid(refreshToken, user)).thenReturn(false);
 
         assertThrows(InvalidTokenException.class, () -> authenticationService.refreshToken(refreshToken));
@@ -174,20 +172,22 @@ class AuthenticationServiceImplTest {
         String refreshToken = "refresh-token";
         User user = user("user@example.com");
         Token storedToken = token(refreshToken, TokenType.REFRESH, user);
+        AuthenticationSession response = AuthenticationSession.builder()
+                .accessToken("new-access-token")
+                .refreshToken("new-refresh-token")
+                .build();
 
         when(jwtService.extractUsername(refreshToken)).thenReturn(user.getEmail());
         when(tokenService.findByToken(refreshToken)).thenReturn(storedToken);
-        when(userService.findByEmail(user.getEmail())).thenReturn(user);
         when(jwtService.isTokenValid(refreshToken, user)).thenReturn(true);
-        when(jwtService.generateToken(user)).thenReturn("new-access-token");
+        when(tokenService.generateAuthenticationSession(user)).thenReturn(response);
 
-        AuthenticationResponse response = authenticationService.refreshToken(refreshToken);
+        AuthenticationSession result = authenticationService.refreshToken(refreshToken);
 
-        assertEquals("new-access-token", response.getAccessToken());
-        assertEquals(refreshToken, response.getRefreshToken());
+        assertEquals("new-access-token", result.getAccessToken());
+        assertEquals("new-refresh-token", result.getRefreshToken());
         verify(tokenService).revokeAllUserTokens(user);
-        verify(tokenService).saveToken(user, "new-access-token", TokenType.ACCESS);
-        verify(tokenService).saveToken(user, refreshToken, TokenType.REFRESH);
+        verify(tokenService).generateAuthenticationSession(user);
     }
 
     @Test
@@ -206,11 +206,10 @@ class AuthenticationServiceImplTest {
     }
 
     @Test
-    void meIssuesNewRefreshTokenWhenStoredOneExpired() {
+    void meReturnsCurrentUserWithoutReissuingTokens() {
         String jwtToken = "access-token";
         User user = user("user@example.com");
         Token accessToken = token(jwtToken, TokenType.ACCESS, user);
-        Token refreshToken = token("stale-refresh-token", TokenType.REFRESH, user);
         PublicUserResponse publicUserResponse = PublicUserResponse.builder()
                 .id(user.getId())
                 .email(user.getEmail())
@@ -218,17 +217,13 @@ class AuthenticationServiceImplTest {
 
         when(tokenService.findByToken(jwtToken)).thenReturn(accessToken);
         when(jwtService.isTokenValid(jwtToken, user)).thenReturn(true);
-        when(tokenService.findByUser(user)).thenReturn(List.of(accessToken, refreshToken));
-        when(jwtService.isTokenValid(refreshToken.getToken(), user)).thenReturn(false);
-        when(jwtService.generateRefreshToken(user)).thenReturn("fresh-refresh-token");
         when(userService.toPublicUserResponse(user)).thenReturn(publicUserResponse);
 
         AuthenticationResponse response = authenticationService.me(jwtToken);
 
-        assertEquals(jwtToken, response.getAccessToken());
-        assertEquals("fresh-refresh-token", response.getRefreshToken());
         assertSame(publicUserResponse, response.getUser());
-        verify(tokenService).saveToken(user, "fresh-refresh-token", TokenType.REFRESH);
+        verify(tokenService, never()).findByUser(any());
+        verify(tokenService, never()).saveToken(any(), any(), any());
     }
 
     @Test

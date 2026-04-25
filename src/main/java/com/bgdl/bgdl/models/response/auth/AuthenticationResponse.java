@@ -2,19 +2,18 @@ package com.bgdl.bgdl.models.response.auth;
 
 import com.bgdl.bgdl.models.response.PublicUserResponse;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 
 @Getter
-@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class AuthenticationResponse implements Serializable {
-    private String accessToken;
-    private String refreshToken;
-
-    @JsonInclude(JsonInclude.Include.NON_NULL)
     private PublicUserResponse user;
 }

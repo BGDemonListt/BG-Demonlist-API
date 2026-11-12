@@ -32,9 +32,11 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -44,6 +46,7 @@ public class DemonServiceImpl extends BaseService<Demon, UUID> implements DemonS
     private final DemonRepository demonRepository;
     private final SkillsetTagRepository skillsetTagRepository;
     private final LeaderboardService leaderboardService;
+    private final LeaderboardDatabaseLock databaseLock;
 
     @Override
     @Transactional(readOnly = true)
@@ -83,30 +86,31 @@ public class DemonServiceImpl extends BaseService<Demon, UUID> implements DemonS
     @Override
     @Transactional
     public DemonResponse createDemon(DemonRequest demonRequest) {
+        databaseLock.lock();
         if (demonRepository.findByDeletedAtIsNullAndLevelId(demonRequest.getLevelId()).isPresent()) {
             throw new DemonCreateException(true);
         }
 
         Demon demon = mapRequestToDemon(new Demon(), demonRequest);
-        List<Demon> reorderedDemons = reorderDemons(
-                demonRepository.findAllByDeletedAtIsNullOrderByPositionAsc(),
-                demon,
-                demonRequest.getPosition()
-        );
+        List<Demon> activeDemons = demonRepository.findAllByDeletedAtIsNullOrderByPositionAsc();
+        Set<UUID> affectedDemonIds = activeDemons.stream().map(Demon::getId).collect(Collectors.toSet());
+        List<Demon> reorderedDemons = reorderDemons(activeDemons, demon, demonRequest.getPosition());
 
-        try {
-            demonRepository.saveAll(reorderedDemons);
-            leaderboardService.requestRebuild();
-            return toResponse(demon);
-        } catch (RuntimeException exception) {
-            throw new DemonCreateException(false);
+        demonRepository.saveAll(reorderedDemons);
+        if (!affectedDemonIds.isEmpty()) {
+            leaderboardService.requestRebuild(affectedDemonIds, Set.of());
         }
+        return toResponse(demon);
     }
 
     @Override
     @Transactional
     public DemonResponse update(long levelId, DemonRequest demonRequest) {
+        databaseLock.lock();
         Demon demon = getEntityByLevelId(levelId);
+        List<Demon> activeDemons = new ArrayList<>(demonRepository.findAllByDeletedAtIsNullOrderByPositionAsc());
+        Map<UUID, DemonPlacement> previousPlacements = activeDemons.stream()
+                .collect(Collectors.toMap(Demon::getId, current -> new DemonPlacement(current.getPosition(), current.getPoints())));
         Optional<Demon> potentialDemon = demonRepository.findByDeletedAtIsNullAndLevelIdAndIdNot(
                 demonRequest.getLevelId(),
                 demon.getId()
@@ -117,19 +121,30 @@ public class DemonServiceImpl extends BaseService<Demon, UUID> implements DemonS
         }
 
         mapRequestToDemon(demon, demonRequest);
-        List<Demon> activeDemons = new ArrayList<>(demonRepository.findAllByDeletedAtIsNullOrderByPositionAsc());
         activeDemons.removeIf(existingDemon -> existingDemon.getId().equals(demon.getId()));
 
         List<Demon> reorderedDemons = reorderDemons(activeDemons, demon, demonRequest.getPosition());
         demonRepository.saveAll(reorderedDemons);
-        leaderboardService.requestRebuild();
+        Set<UUID> affectedDemonIds = reorderedDemons.stream()
+                .filter(current -> !new DemonPlacement(current.getPosition(), current.getPoints())
+                        .equals(previousPlacements.get(current.getId())))
+                .map(Demon::getId)
+                .collect(Collectors.toSet());
+        if (!affectedDemonIds.isEmpty()) {
+            leaderboardService.requestRebuild(affectedDemonIds, Set.of());
+        }
         return toResponse(demon);
     }
 
     @Override
     @Transactional
     public void delete(UUID id) {
+        databaseLock.lock();
         Demon demon = getEntityById(id, false);
+        Set<UUID> affectedDemonIds = demonRepository.findAllByDeletedAtIsNullOrderByPositionAsc().stream()
+                .map(Demon::getId)
+                .collect(Collectors.toSet());
+        affectedDemonIds.add(id);
         super.delete(id);
 
         if (demon.getDeletedAt() != null) {
@@ -141,7 +156,7 @@ public class DemonServiceImpl extends BaseService<Demon, UUID> implements DemonS
             demonRepository.saveAll(reorderedDemons);
         }
 
-        leaderboardService.requestRebuild();
+        leaderboardService.requestRebuild(affectedDemonIds, Set.of());
     }
 
     @Override
@@ -280,5 +295,8 @@ public class DemonServiceImpl extends BaseService<Demon, UUID> implements DemonS
         response.setId(tag.getId());
         response.setName(tag.getName());
         return response;
+    }
+
+    private record DemonPlacement(int position, double points) {
     }
 }

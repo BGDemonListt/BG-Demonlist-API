@@ -15,11 +15,13 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.time.LocalDateTime;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -31,6 +33,9 @@ class LeaderboardRebuildWorkerTest {
 
     @Mock
     private RecordSubmissionRepository recordSubmissionRepository;
+
+    @Mock
+    private LeaderboardDatabaseLock databaseLock;
 
     @InjectMocks
     private LeaderboardRebuildWorker leaderboardRebuildWorker;
@@ -50,11 +55,17 @@ class LeaderboardRebuildWorkerTest {
         RecordSubmission betaMid = submission(secondPlayer, midDemon);
         RecordSubmission removed = submission(firstPlayer, removedDemon);
 
-        when(playerRepository.findAllByDeletedAtIsNull()).thenReturn(List.of(firstPlayer, secondPlayer, emptyPlayer));
-        when(recordSubmissionRepository.findAllByDeletedAtIsNullAndStatus(RecordSubmissionStatus.ACCEPTED))
+        when(playerRepository.findAllByDeletedAtIsNullAndIdIn(anySet()))
+                .thenReturn(List.of(firstPlayer, secondPlayer, emptyPlayer));
+        when(playerRepository.findAllByDeletedAtIsNullAndPointsGreaterThan(0.0))
+                .thenAnswer(invocation -> List.of(firstPlayer, secondPlayer));
+        when(recordSubmissionRepository.findAllByDeletedAtIsNullAndStatusAndHolderIdIn(
+                org.mockito.ArgumentMatchers.eq(RecordSubmissionStatus.ACCEPTED), anySet()))
                 .thenReturn(List.of(alphaTop, alphaDuplicate, betaMid, removed));
 
-        leaderboardRebuildWorker.rebuildLeaderboard();
+        leaderboardRebuildWorker.rebuildAffected(Set.of(), Set.of(
+                firstPlayer.getId(), secondPlayer.getId(), emptyPlayer.getId()
+        ));
 
         assertEquals(323.0, firstPlayer.getPoints());
         assertEquals(1, firstPlayer.getRank());
@@ -70,7 +81,43 @@ class LeaderboardRebuildWorkerTest {
         assertNull(emptyPlayer.getHardestDemon());
         assertEquals(0, emptyPlayer.getCompletedDemons().size());
 
-        verify(playerRepository).saveAll(anyList());
+        verify(playerRepository, org.mockito.Mockito.times(2)).saveAll(anyList());
+    }
+
+    @Test
+    void acceptedRecordRecomputesOnlyItsHolderButShiftsOtherRanks() {
+        Player leader = player("Leader");
+        leader.setPoints(323.0);
+        leader.setRank(1);
+        Demon top = demon("Top", 1, 323.0, false);
+        leader.setHardestDemon(top);
+
+        Player newcomer = player("Newcomer");
+        Demon middle = demon("Middle", 2, 200.0, false);
+        Player lower = player("Lower");
+        lower.setPoints(100.0);
+        lower.setRank(2);
+        lower.setHardestDemon(demon("Low", 3, 100.0, false));
+
+        when(recordSubmissionRepository.findDistinctHolderIdsByStatusAndDemonIds(
+                RecordSubmissionStatus.ACCEPTED, Set.of(middle.getId())))
+                .thenReturn(Set.of(newcomer.getId()));
+        when(playerRepository.findAllByDeletedAtIsNullAndIdIn(Set.of(newcomer.getId())))
+                .thenReturn(List.of(newcomer));
+        when(recordSubmissionRepository.findAllByDeletedAtIsNullAndStatusAndHolderIdIn(
+                RecordSubmissionStatus.ACCEPTED, Set.of(newcomer.getId())))
+                .thenReturn(List.of(submission(newcomer, middle)));
+        when(playerRepository.findAllByDeletedAtIsNullAndPointsGreaterThan(0.0))
+                .thenReturn(List.of(lower, newcomer, leader));
+
+        leaderboardRebuildWorker.rebuildAffected(Set.of(middle.getId()), Set.of());
+
+        assertEquals(323.0, leader.getPoints());
+        assertEquals(1, leader.getRank());
+        assertEquals(200.0, newcomer.getPoints());
+        assertEquals(2, newcomer.getRank());
+        assertEquals(100.0, lower.getPoints());
+        assertEquals(3, lower.getRank());
     }
 
     private Player player(String name) {

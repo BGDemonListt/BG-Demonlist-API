@@ -10,6 +10,7 @@ import com.bgdl.bgdl.repositories.RecordSubmissionRepository;
 import com.bgdl.bgdl.services.DemonService;
 import com.bgdl.bgdl.services.LeaderboardService;
 import com.bgdl.bgdl.services.PlayerService;
+import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -18,11 +19,13 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -42,6 +45,9 @@ class RecordSubmissionServiceImplTest {
 
     @Mock
     private LeaderboardService leaderboardService;
+
+    @Mock
+    private EntityManager entityManager;
 
     @InjectMocks
     private RecordSubmissionServiceImpl recordSubmissionService;
@@ -78,7 +84,28 @@ class RecordSubmissionServiceImplTest {
         assertEquals("Player One", response.getHolder().getName());
         assertEquals("Top Demon", response.getDemon().getLevelTitle());
         assertNotNull(response.getId());
-        verify(leaderboardService, never()).requestRebuild();
+        verify(leaderboardService, never()).requestRebuild(any(), any());
+    }
+
+    @Test
+    void adminCreateAcceptsImmediatelyAndSchedulesOnlyTheHolder() {
+        Player player = player(UUID.randomUUID(), "Player One");
+        Demon demon = demon(UUID.randomUUID(), "Top Demon");
+        RecordSubmissionRequest request = new RecordSubmissionRequest();
+        request.setPlayerId(player.getId());
+        request.setDemonId(demon.getId());
+        request.setStatus(RecordSubmissionStatus.REJECTED);
+
+        when(playerService.getById(player.getId())).thenReturn(player);
+        when(recordSubmissionRepository.findByDeletedAtIsNullAndHolderIdAndDemonId(player.getId(), demon.getId()))
+                .thenReturn(Optional.empty());
+        when(demonService.getById(demon.getId())).thenReturn(demon);
+        when(recordSubmissionRepository.save(any(RecordSubmission.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        RecordSubmissionResponse response = recordSubmissionService.createAccepted(request);
+
+        assertEquals(RecordSubmissionStatus.ACCEPTED, response.getStatus());
+        verify(leaderboardService).requestRebuild(Set.of(), Set.of(player.getId()));
     }
 
     @Test
@@ -89,13 +116,13 @@ class RecordSubmissionServiceImplTest {
         request.setId(submissionId);
         request.setStatus(RecordSubmissionStatus.ACCEPTED);
 
-        when(recordSubmissionRepository.findById(submissionId)).thenReturn(Optional.of(submission));
+        when(recordSubmissionRepository.findByIdForUpdate(submissionId)).thenReturn(Optional.of(submission));
         when(recordSubmissionRepository.save(any(RecordSubmission.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         RecordSubmissionResponse response = recordSubmissionService.update(request);
 
         assertEquals(RecordSubmissionStatus.ACCEPTED, response.getStatus());
-        verify(leaderboardService).requestRebuild();
+        verify(leaderboardService).requestRebuild(Set.of(), Set.of(submission.getHolder().getId()));
     }
 
     @Test
@@ -106,13 +133,13 @@ class RecordSubmissionServiceImplTest {
         request.setId(submissionId);
         request.setStatus(RecordSubmissionStatus.REJECTED);
 
-        when(recordSubmissionRepository.findById(submissionId)).thenReturn(Optional.of(submission));
+        when(recordSubmissionRepository.findByIdForUpdate(submissionId)).thenReturn(Optional.of(submission));
         when(recordSubmissionRepository.save(any(RecordSubmission.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         RecordSubmissionResponse response = recordSubmissionService.update(request);
 
         assertEquals(RecordSubmissionStatus.REJECTED, response.getStatus());
-        verify(leaderboardService).requestRebuild();
+        verify(leaderboardService).requestRebuild(Set.of(), Set.of(submission.getHolder().getId()));
     }
 
     @Test
@@ -123,13 +150,13 @@ class RecordSubmissionServiceImplTest {
         request.setId(submissionId);
         request.setStatus(RecordSubmissionStatus.REJECTED);
 
-        when(recordSubmissionRepository.findById(submissionId)).thenReturn(Optional.of(submission));
+        when(recordSubmissionRepository.findByIdForUpdate(submissionId)).thenReturn(Optional.of(submission));
         when(recordSubmissionRepository.save(any(RecordSubmission.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         RecordSubmissionResponse response = recordSubmissionService.update(request);
 
         assertEquals(RecordSubmissionStatus.REJECTED, response.getStatus());
-        verify(leaderboardService, never()).requestRebuild();
+        verify(leaderboardService, never()).requestRebuild(any(), any());
     }
 
     @Test
@@ -137,13 +164,14 @@ class RecordSubmissionServiceImplTest {
         UUID submissionId = UUID.randomUUID();
         RecordSubmission submission = submission(submissionId, RecordSubmissionStatus.ACCEPTED);
 
+        when(recordSubmissionRepository.findByIdForUpdate(submissionId)).thenReturn(Optional.of(submission));
         when(recordSubmissionRepository.findById(submissionId)).thenReturn(Optional.of(submission));
         when(recordSubmissionRepository.save(any(RecordSubmission.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         recordSubmissionService.delete(submissionId);
 
         verify(recordSubmissionRepository).save(submission);
-        verify(leaderboardService).requestRebuild();
+        verify(leaderboardService).requestRebuild(Set.of(), Set.of(submission.getHolder().getId()));
     }
 
     @Test
@@ -152,6 +180,7 @@ class RecordSubmissionServiceImplTest {
         RecordSubmission submission = submission(submissionId, RecordSubmissionStatus.ACCEPTED);
         submission.setDeletedAt(LocalDateTime.now());
 
+        when(recordSubmissionRepository.findByIdForUpdate(submissionId)).thenReturn(Optional.of(submission));
         when(recordSubmissionRepository.findById(submissionId)).thenReturn(Optional.of(submission));
         when(recordSubmissionRepository.save(any(RecordSubmission.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
@@ -159,7 +188,22 @@ class RecordSubmissionServiceImplTest {
 
         assertNull(submission.getDeletedAt());
         verify(recordSubmissionRepository).save(submission);
-        verify(leaderboardService).requestRebuild();
+        verify(leaderboardService).requestRebuild(Set.of(), Set.of(submission.getHolder().getId()));
+    }
+
+    @Test
+    void restoringRecordRejectsDuplicateActiveCompletion() {
+        UUID submissionId = UUID.randomUUID();
+        RecordSubmission submission = submission(submissionId, RecordSubmissionStatus.ACCEPTED);
+        submission.setDeletedAt(LocalDateTime.now());
+        when(recordSubmissionRepository.findByIdForUpdate(submissionId)).thenReturn(Optional.of(submission));
+        when(recordSubmissionRepository.findByDeletedAtIsNullAndHolderIdAndDemonId(
+                submission.getHolder().getId(), submission.getDemon().getId()))
+                .thenReturn(Optional.of(submission(UUID.randomUUID(), RecordSubmissionStatus.PENDING)));
+
+        assertThrows(com.bgdl.bgdl.exceptions.recordSubmissions.RecordSubmissionCreateException.class,
+                () -> recordSubmissionService.delete(submissionId));
+        verify(recordSubmissionRepository, never()).save(any());
     }
 
     private RecordSubmission submission(UUID id, RecordSubmissionStatus status) {

@@ -11,6 +11,8 @@ public interface RecordSubmissionService {
 
     RecordSubmissionResponse create(RecordSubmissionRequest recordSubmissionRequest);
 
+    RecordSubmissionResponse createAccepted(RecordSubmissionRequest recordSubmissionRequest);
+
     RecordSubmissionResponse update(RecordSubmissionRequest recordSubmissionRequest);
 
     void delete(UUID id);

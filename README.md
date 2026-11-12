@@ -8,7 +8,7 @@ Backend API for the Bulgarian Geometry Dash Demonlist platform. The service mana
 - Google OAuth sign-in plus Discord account linking for existing users
 - Paginated demon list with search and skillset-tag filtering
 - Player leaderboard with 1-based pagination, region filtering, hardest demon tracking, and completed-demon history
-- Record submission moderation that triggers leaderboard rebuilds whenever accepted runs change
+- Record submission moderation and admin-added accepted runs that update affected player scores and ranks
 - Admin CRUD for demons, users, and skillset tags
 - Static file serving for region flags and uploaded assets under `/files/**`
 - Geometry Dash level metadata proxy under `/gd/api/{levelId}`
@@ -32,7 +32,7 @@ Backend API for the Bulgarian Geometry Dash Demonlist platform. The service mana
 - `POST /api/v1/records` always stores submissions as `PENDING`, even if another status is sent.
 - Demon order changes and accepted-record changes both request a leaderboard rebuild.
 - Flyway scripts are present in `src/main/resources/db/migration`, but Flyway is currently disabled in `src/main/resources/application.yaml`; schema changes are applied through Hibernate `ddl-auto=update`.
-- General endpoints are rate-limited to `100` requests per `30m`; sensitive endpoints are limited to `10` requests per `1m`.
+- Shared per-instance limits are `3000/min` for general endpoints, `100/min` for sensitive endpoints, and `600/min` for admin record moderation.
 
 ## Environment configuration
 
@@ -43,6 +43,8 @@ The application reads its runtime settings from environment variables referenced
 - `DB_URL` example: `postgresql://localhost:5432/bgdl`
 - `DB_USER`
 - `DB_PASSWORD`
+- `DB_POOL_SIZE` (optional, defaults to `30` connections per API instance)
+- `DB_POOL_MIN_IDLE` (optional, defaults to `10`)
 - `JWT_SECRET`
 - `JWT_EXPIRATION`
 - `REFRESH_TOKEN_EXPIRATION`
@@ -138,8 +140,11 @@ Player details include:
 
 - `GET /api/v1/records`
 - `POST /api/v1/records`
+- `POST /api/v1/records/admin` (admin-only, immediately accepted)
 - `PUT /api/v1/records`
 - `DELETE /api/v1/records/{id}`
+
+Leaderboard updates run after the record or demon change commits. They recalculate affected players and then rerank active players; requests made while the background update is running can briefly see the previous standings. Players with no accepted active demon records are excluded from leaderboard pages.
 
 Submission payloads support:
 

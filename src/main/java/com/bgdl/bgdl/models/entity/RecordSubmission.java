@@ -15,7 +15,10 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 @Entity
-@Table(name = "record_submissions")
+@Table(name = "record_submissions", indexes = {
+        @Index(name = "idx_records_holder_status", columnList = "holder_id, status, deleted_at"),
+        @Index(name = "idx_records_demon_status", columnList = "demon_id, status, deleted_at")
+})
 public class RecordSubmission extends BaseEntity {
     @NotNull
     @Min(value = 0, message = "Прогресът трябва да бъде между 0 и 100")

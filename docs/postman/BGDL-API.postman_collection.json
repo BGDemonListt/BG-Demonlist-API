@@ -3,12 +3,12 @@
     "_postman_id": "2b4dd4ba-c3fd-4dd1-9c8f-bf36f49d4e4b",
     "name": "BGDL API",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-    "description": "Postman collection for the BG Demonlist API."
+    "description": "Postman collection for the BG Demonlist API. Authenticate first: Postman saves the BGDL_ACCESS_TOKEN and BGDL_REFRESH_TOKEN cookies automatically for the selected base URL."
   },
   "variable": [
     { "key": "baseUrl", "value": "http://localhost:8080" },
-    { "key": "accessToken", "value": "" },
-    { "key": "refreshToken", "value": "" },
+    { "key": "authEmail", "value": "player@example.com" },
+    { "key": "authPassword", "value": "mypassword123" },
     { "key": "userId", "value": "00000000-0000-0000-0000-000000000001" },
     { "key": "playerId", "value": "00000000-0000-0000-0000-000000000002" },
     { "key": "playerRegion", "value": "VARNA" },
@@ -38,10 +38,18 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"email\": \"player@example.com\",\n  \"password\": \"mypassword123\",\n  \"name\": \"Player One\",\n  \"role\": \"USER\",\n  \"provider\": \"LOCAL\"\n}"
+              "raw": "{\n  \"email\": \"{{authEmail}}\",\n  \"password\": \"{{authPassword}}\",\n  \"name\": \"Player One\",\n  \"role\": \"USER\",\n  \"provider\": \"LOCAL\"\n}"
             },
             "url": "{{baseUrl}}/api/v1/auth/register"
-          }
+          },
+          "event": [{
+            "listen": "test",
+            "script": { "type": "text/javascript", "exec": [
+              "const user = pm.response.json().user;",
+              "pm.collectionVariables.set('userId', user.id);",
+              "pm.collectionVariables.set('playerId', user.playerId);"
+            ] }
+          }]
         },
         {
           "name": "Confirm Registration",
@@ -66,16 +74,24 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"email\": \"nipecak871@httpsu.com\",\n  \"password\": \"mypassword123\"\n}"
+              "raw": "{\n  \"email\": \"{{authEmail}}\",\n  \"password\": \"{{authPassword}}\"\n}"
             },
             "url": "{{baseUrl}}/api/v1/auth/authenticate"
-          }
+          },
+          "event": [{
+            "listen": "test",
+            "script": { "type": "text/javascript", "exec": [
+              "const user = pm.response.json().user;",
+              "pm.collectionVariables.set('userId', user.id);",
+              "pm.collectionVariables.set('playerId', user.playerId);"
+            ] }
+          }]
         },
         {
           "name": "Refresh Token",
           "request": {
-            "method": "GET",
-            "url": "{{baseUrl}}/api/v1/auth/refresh-token/{{refreshToken}}"
+            "method": "POST",
+            "url": "{{baseUrl}}/api/v1/auth/refresh-token"
           }
         },
         {
@@ -83,7 +99,6 @@
           "request": {
             "method": "GET",
             "header": [
-              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
             ],
             "url": "{{baseUrl}}/api/v1/auth/me"
           }
@@ -91,9 +106,8 @@
         {
           "name": "Logout",
           "request": {
-            "method": "GET",
+            "method": "POST",
             "header": [
-              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
             ],
             "url": "{{baseUrl}}/api/v1/auth/logout"
           }
@@ -103,11 +117,11 @@
           "request": {
             "method": "POST",
             "url": {
-              "raw": "{{baseUrl}}/api/v1/auth/forgot-password?email=player@example.com",
+              "raw": "{{baseUrl}}/api/v1/auth/forgot-password?email={{authEmail}}",
               "host": ["{{baseUrl}}"],
               "path": ["api", "v1", "auth", "forgot-password"],
               "query": [
-                { "key": "email", "value": "player@example.com" }
+                { "key": "email", "value": "{{authEmail}}" }
               ]
             }
           }
@@ -158,7 +172,6 @@
           "request": {
             "method": "GET",
             "header": [
-              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
             ],
             "url": "{{baseUrl}}/api/v1/oauth2/url/discord/link"
           }
@@ -168,7 +181,6 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
             ],
             "url": {
               "raw": "{{baseUrl}}/api/v1/oauth2/link/discord?code={{discordCode}}&state={{discordState}}",
@@ -186,7 +198,6 @@
           "request": {
             "method": "DELETE",
             "header": [
-              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
             ],
             "url": "{{baseUrl}}/api/v1/oauth2/link/discord"
           }
@@ -201,7 +212,6 @@
           "request": {
             "method": "GET",
             "header": [
-              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
             ],
             "url": "{{baseUrl}}/api/v1/users/all"
           }
@@ -211,7 +221,6 @@
           "request": {
             "method": "GET",
             "header": [
-              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
             ],
             "url": "{{baseUrl}}/api/v1/users/{{userId}}/admin"
           }
@@ -221,7 +230,6 @@
           "request": {
             "method": "PUT",
             "header": [
-              { "key": "Authorization", "value": "Bearer {{accessToken}}" },
               { "key": "Content-Type", "value": "application/json" }
             ],
             "body": {
@@ -236,7 +244,6 @@
           "request": {
             "method": "PATCH",
             "header": [
-              { "key": "Authorization", "value": "Bearer {{accessToken}}" },
               { "key": "Content-Type", "value": "application/json" }
             ],
             "body": {
@@ -251,7 +258,6 @@
           "request": {
             "method": "DELETE",
             "header": [
-              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
             ],
             "url": "{{baseUrl}}/api/v1/users/{{userId}}"
           }
@@ -290,7 +296,6 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "Authorization", "value": "Bearer {{accessToken}}" },
               { "key": "Content-Type", "value": "application/json" }
             ],
             "body": {
@@ -305,7 +310,6 @@
           "request": {
             "method": "PUT",
             "header": [
-              { "key": "Authorization", "value": "Bearer {{accessToken}}" },
               { "key": "Content-Type", "value": "application/json" }
             ],
             "body": {
@@ -320,7 +324,6 @@
           "request": {
             "method": "DELETE",
             "header": [
-              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
             ],
             "url": "{{baseUrl}}/api/v1/demons/{{demonId}}"
           }
@@ -342,7 +345,6 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "Authorization", "value": "Bearer {{accessToken}}" },
               { "key": "Content-Type", "value": "application/json" }
             ],
             "body": {
@@ -357,7 +359,6 @@
           "request": {
             "method": "PUT",
             "header": [
-              { "key": "Authorization", "value": "Bearer {{accessToken}}" },
               { "key": "Content-Type", "value": "application/json" }
             ],
             "body": {
@@ -372,7 +373,6 @@
           "request": {
             "method": "DELETE",
             "header": [
-              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
             ],
             "url": "{{baseUrl}}/api/v1/skillset-tags/{{skillsetTagId}}"
           }
@@ -434,7 +434,6 @@
           "request": {
             "method": "GET",
             "header": [
-              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
             ],
             "url": "{{baseUrl}}/api/v1/records"
           }
@@ -451,14 +450,19 @@
               "raw": "{\n  \"playerId\": \"{{playerId}}\",\n  \"demonId\": \"{{demonId}}\",\n  \"progress\": 100,\n  \"youtubeUrl\": \"https://youtube.com/watch?v=example\",\n  \"rawFootageUrl\": \"https://drive.google.com/file/example\",\n  \"description\": \"Clean completion\"\n}"
             },
             "url": "{{baseUrl}}/api/v1/records"
-          }
+          },
+          "event": [{
+            "listen": "test",
+            "script": { "type": "text/javascript", "exec": [
+              "if (pm.response.code < 300) pm.collectionVariables.set('recordId', pm.response.json().id);"
+            ] }
+          }]
         },
         {
           "name": "Moderate Record Submission",
           "request": {
             "method": "PUT",
             "header": [
-              { "key": "Authorization", "value": "Bearer {{accessToken}}" },
               { "key": "Content-Type", "value": "application/json" }
             ],
             "body": {
@@ -469,11 +473,30 @@
           }
         },
         {
+          "name": "Admin Add Accepted Record",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"playerId\": \"{{playerId}}\",\n  \"demonId\": \"{{demonId}}\",\n  \"progress\": 100,\n  \"youtubeUrl\": \"https://youtube.com/watch?v=example\",\n  \"rawFootageUrl\": \"https://drive.google.com/file/example\",\n  \"description\": \"Admin-added completion\"\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/records/admin"
+          },
+          "event": [{
+            "listen": "test",
+            "script": { "type": "text/javascript", "exec": [
+              "if (pm.response.code < 300) pm.collectionVariables.set('recordId', pm.response.json().id);"
+            ] }
+          }]
+        },
+        {
           "name": "Delete Record Submission",
           "request": {
             "method": "DELETE",
             "header": [
-              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
             ],
             "url": "{{baseUrl}}/api/v1/records/{{recordId}}"
           }

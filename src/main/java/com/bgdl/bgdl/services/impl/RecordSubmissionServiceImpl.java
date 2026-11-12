@@ -16,12 +16,15 @@ import com.bgdl.bgdl.services.DemonService;
 import com.bgdl.bgdl.services.LeaderboardService;
 import com.bgdl.bgdl.services.PlayerService;
 import com.bgdl.bgdl.services.RecordSubmissionService;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.LockModeType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 @Service
@@ -31,6 +34,7 @@ public class RecordSubmissionServiceImpl extends BaseService<RecordSubmission, U
     private final DemonService demonService;
     private final PlayerService playerService;
     private final LeaderboardService leaderboardService;
+    private final EntityManager entityManager;
 
     @Override
     @Transactional(readOnly = true)
@@ -44,6 +48,18 @@ public class RecordSubmissionServiceImpl extends BaseService<RecordSubmission, U
     @Override
     @Transactional
     public RecordSubmissionResponse create(RecordSubmissionRequest request) {
+        return createWithStatus(request, RecordSubmissionStatus.PENDING);
+    }
+
+    @Override
+    @Transactional
+    public RecordSubmissionResponse createAccepted(RecordSubmissionRequest request) {
+        return createWithStatus(request, RecordSubmissionStatus.ACCEPTED);
+    }
+
+    private RecordSubmissionResponse createWithStatus(RecordSubmissionRequest request, RecordSubmissionStatus status) {
+        Player player = playerService.getById(request.getPlayerId());
+        entityManager.lock(player, LockModeType.PESSIMISTIC_WRITE);
         boolean isDuplicate = recordSubmissionRepository.findByDeletedAtIsNullAndHolderIdAndDemonId(
                 request.getPlayerId(),
                 request.getDemonId()
@@ -53,7 +69,6 @@ public class RecordSubmissionServiceImpl extends BaseService<RecordSubmission, U
             throw new RecordSubmissionCreateException(true);
         }
 
-        Player player = playerService.getById(request.getPlayerId());
         Demon demon = demonService.getById(request.getDemonId());
 
         RecordSubmission recordSubmission = new RecordSubmission();
@@ -61,22 +76,23 @@ public class RecordSubmissionServiceImpl extends BaseService<RecordSubmission, U
         recordSubmission.setYoutubeUrl(request.getYoutubeUrl());
         recordSubmission.setRawFootageUrl(request.getRawFootageUrl());
         recordSubmission.setDescription(request.getDescription());
-        recordSubmission.setStatus(RecordSubmissionStatus.PENDING);
+        recordSubmission.setStatus(status);
         recordSubmission.setDemon(demon);
         recordSubmission.setHolder(player);
 
-        try {
-            RecordSubmission savedRecordSubmission = recordSubmissionRepository.save(recordSubmission);
-            return toResponse(savedRecordSubmission);
-        } catch (RuntimeException exception) {
-            throw new RecordSubmissionCreateException(false);
+        RecordSubmission savedRecordSubmission = recordSubmissionRepository.save(recordSubmission);
+        if (status == RecordSubmissionStatus.ACCEPTED) {
+            leaderboardService.requestRebuild(Set.of(), Set.of(player.getId()));
         }
+        return toResponse(savedRecordSubmission);
     }
 
     @Override
     @Transactional
     public RecordSubmissionResponse update(RecordSubmissionRequest request) {
-        RecordSubmission submission = getEntityById(request.getId(), true);
+        RecordSubmission submission = recordSubmissionRepository.findByIdForUpdate(request.getId())
+                .filter(record -> record.getDeletedAt() == null)
+                .orElseThrow(this::notFoundException);
         RecordSubmissionStatus previousStatus = submission.getStatus();
         RecordSubmissionStatus nextStatus = request.getStatus();
 
@@ -87,24 +103,30 @@ public class RecordSubmissionServiceImpl extends BaseService<RecordSubmission, U
         RecordSubmission savedSubmission = recordSubmissionRepository.save(submission);
 
         if (previousStatus == RecordSubmissionStatus.ACCEPTED ^ savedSubmission.getStatus() == RecordSubmissionStatus.ACCEPTED) {
-            leaderboardService.requestRebuild();
+            leaderboardService.requestRebuild(Set.of(), Set.of(savedSubmission.getHolder().getId()));
         }
 
-        return toResponse(getEntityById(savedSubmission.getId(), true));
+        return toResponse(savedSubmission);
     }
 
     @Override
     @Transactional
     public void delete(UUID id) {
-        RecordSubmission submission = getEntityById(id, false);
-        boolean affectsLeaderboard = submission.getDeletedAt() == null
-                ? submission.getStatus() == RecordSubmissionStatus.ACCEPTED
-                : submission.getDeletedAt() != null && submission.getStatus() == RecordSubmissionStatus.ACCEPTED;
+        RecordSubmission submission = recordSubmissionRepository.findByIdForUpdate(id)
+                .orElseThrow(this::notFoundException);
+        if (submission.getDeletedAt() != null) {
+            entityManager.lock(submission.getHolder(), LockModeType.PESSIMISTIC_WRITE);
+            if (recordSubmissionRepository.findByDeletedAtIsNullAndHolderIdAndDemonId(
+                    submission.getHolder().getId(), submission.getDemon().getId()).isPresent()) {
+                throw new RecordSubmissionCreateException(true);
+            }
+        }
+        boolean affectsLeaderboard = submission.getStatus() == RecordSubmissionStatus.ACCEPTED;
 
         super.delete(id);
 
         if (affectsLeaderboard) {
-            leaderboardService.requestRebuild();
+            leaderboardService.requestRebuild(Set.of(), Set.of(submission.getHolder().getId()));
         }
     }
 

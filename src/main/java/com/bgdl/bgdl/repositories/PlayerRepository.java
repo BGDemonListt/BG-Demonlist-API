@@ -12,6 +12,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 @Repository
@@ -31,13 +32,13 @@ public interface PlayerRepository extends JpaRepository<Player, UUID> {
             SELECT p
             FROM Player p
             WHERE p.deletedAt IS NULL
+              AND p.rank IS NOT NULL
+              AND p.points > 0
               AND LOWER(p.name) LIKE LOWER(CONCAT('%', :name, '%'))
               AND (:region IS NULL OR p.region = :region)
             ORDER BY
-              CASE WHEN p.rank IS NULL THEN 1 ELSE 0 END,
               p.rank ASC,
-              p.points DESC,
-              p.name ASC
+              p.id ASC
             """)
     Page<Player> findLeaderboardPage(
             @Param("name") String name,
@@ -46,6 +47,14 @@ public interface PlayerRepository extends JpaRepository<Player, UUID> {
     );
 
     List<Player> findAllByDeletedAtIsNull();
+
+    @Query("SELECT p.id FROM Player p WHERE p.deletedAt IS NULL")
+    Set<UUID> findActivePlayerIds();
+
+    List<Player> findAllByDeletedAtIsNullAndIdIn(Set<UUID> ids);
+
+    @EntityGraph(attributePaths = "hardestDemon")
+    List<Player> findAllByDeletedAtIsNullAndPointsGreaterThan(double points);
 
     long countByDeletedAtIsNull();
 }

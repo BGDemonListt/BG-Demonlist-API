@@ -1,6 +1,5 @@
 package com.bgdl.bgdl.controllers;
 
-import com.bgdl.bgdl.enums.RecordSubmissionStatus;
 import com.bgdl.bgdl.models.request.RecordSubmissionRequest;
 import com.bgdl.bgdl.models.response.RecordSubmissionResponse;
 import com.bgdl.bgdl.services.RecordSubmissionService;
@@ -30,20 +29,26 @@ public class RecordSubmissionController {
     @PostMapping
     @RateLimiter(name = "general_api_rate_limiter")
     public ResponseEntity<RecordSubmissionResponse> create(@RequestBody RecordSubmissionRequest recordSubmissionRequest) {
-        recordSubmissionRequest.setStatus(RecordSubmissionStatus.PENDING);
         return ResponseEntity.ok(recordSubmissionService.create(recordSubmissionRequest));
+    }
+
+    @PostMapping("/admin")
+    @PreAuthorize("hasRole('ADMIN')")
+    @RateLimiter(name = "moderation_rate_limiter")
+    public ResponseEntity<RecordSubmissionResponse> createAccepted(@RequestBody RecordSubmissionRequest request) {
+        return ResponseEntity.ok(recordSubmissionService.createAccepted(request));
     }
 
     @PutMapping
     @PreAuthorize("hasRole('ADMIN')")
-    @RateLimiter(name = "sensitive_operations_rate_limiter")
+    @RateLimiter(name = "moderation_rate_limiter")
     public ResponseEntity<RecordSubmissionResponse> update(@RequestBody RecordSubmissionRequest recordSubmissionRequest) {
         return ResponseEntity.ok(recordSubmissionService.update(recordSubmissionRequest));
     }
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    @RateLimiter(name = "general_api_rate_limiter")
+    @RateLimiter(name = "moderation_rate_limiter")
     public ResponseEntity<Void> delete(@PathVariable UUID id) {
         recordSubmissionService.delete(id);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();

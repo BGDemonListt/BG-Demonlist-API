@@ -11,8 +11,8 @@ Use this checklist when validating new backend changes locally. It is written ar
    - one `ADMIN` account for moderation and demon/tag management
    - one normal `USER` account for profile and record submission testing
 5. Keep these collection variables updated as you go:
-   - `accessToken`
-   - `refreshToken`
+   - `authEmail`
+   - `authPassword`
    - `userId`
    - `playerId`
    - `adminUserId`
@@ -39,8 +39,8 @@ Use this checklist when validating new backend changes locally. It is written ar
 1. Run `Register` with a fresh email.
 2. Confirm the account through `Confirm Registration` using the token from email or the database.
 3. Run `Authenticate`.
-4. Save the returned `accessToken`, `refreshToken`, `user.id`, and `user.playerId`.
-5. Run `Get Me` with the bearer token.
+4. Postman saves the returned auth cookies automatically; the collection also saves `user.id` and `user.playerId`.
+5. Run `Get Me` using the saved cookies.
 6. Expect the response to include the same user, player id, role, and any linked Discord profile if present.
 7. Run `Refresh Token` and confirm a fresh auth response is returned.
 8. Optionally run `Forgot Password` and `Reset Password`.
@@ -52,13 +52,13 @@ Use this checklist when validating new backend changes locally. It is written ar
 3. Capture the `code` from the frontend redirect URL.
 4. Run `Authenticate Google` with that code.
 5. Verify:
-   - the response includes `accessToken` and `refreshToken`
+   - Postman receives the authentication cookies
    - the returned user is enabled
    - a player is created for the user if it did not already exist
 
 ## Discord Account Linking
 
-1. Authenticate as a normal user and keep the bearer token active.
+1. Authenticate as a normal user and keep the auth cookies active.
 2. Run `Get Discord Link URL`.
 3. Open the returned URL in a browser and complete the Discord authorization flow.
 4. Capture `code` and `state` from the frontend redirect URL.
@@ -133,6 +133,8 @@ Use this checklist when validating new backend changes locally. It is written ar
    - `completedDemons` contains the demon
    - `hardestDemon` matches the best-ranked accepted demon
    - `position` is populated when the player enters the leaderboard
+
+An admin can run `Admin Add Accepted Record` to grant a completion directly. It must appear on the leaderboard after the queued update. `Delete Record Submission` removes that completion; running it again restores it if no replacement record for the same player and demon exists.
 
 ## Rejection, Re-Acceptance, And Delete Rollback
 

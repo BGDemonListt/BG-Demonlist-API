@@ -18,6 +18,7 @@ import com.bgdl.bgdl.models.response.PublicUserResponse;
 import com.bgdl.bgdl.models.request.auth.RegisterRequest;
 import com.bgdl.bgdl.models.entity.User;
 import com.bgdl.bgdl.repositories.UserRepository;
+import com.bgdl.bgdl.services.LeaderboardService;
 import com.bgdl.bgdl.services.UserService;
 import jakarta.validation.ConstraintViolationException;
 import lombok.RequiredArgsConstructor;
@@ -29,6 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 @RequiredArgsConstructor
@@ -37,6 +39,7 @@ public class UserServiceImpl implements UserService {
     private final PasswordEncoder passwordEncoder;
     private final UserRepository userRepository;
     private final ModelMapper modelMapper;
+    private final LeaderboardService leaderboardService;
 
     /**
      * Creates a new user based on the provided registration request.
@@ -220,7 +223,7 @@ public class UserServiceImpl implements UserService {
             }
 
             user.setName(trimmedName);
-            player.setName(trimmedName);
+            updatePlayerName(player, trimmedName);
         }
 
         if (region != null) {
@@ -230,7 +233,16 @@ public class UserServiceImpl implements UserService {
 
     private void syncPlayerName(User user, String name) {
         if (user.getPlayer() != null && name != null) {
-            user.getPlayer().setName(name.trim());
+            updatePlayerName(user.getPlayer(), name.trim());
+        }
+    }
+
+    private void updatePlayerName(Player player, String name) {
+        if (!name.equals(player.getName())) {
+            player.setName(name);
+            if (player.getRank() != null) {
+                leaderboardService.requestRebuild(Set.of(), Set.of(player.getId()));
+            }
         }
     }
 

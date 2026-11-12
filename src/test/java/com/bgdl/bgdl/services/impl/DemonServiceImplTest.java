@@ -50,6 +50,9 @@ class DemonServiceImplTest {
     private LeaderboardService leaderboardService;
 
     @Mock
+    private LeaderboardDatabaseLock databaseLock;
+
+    @Mock
     private SkillsetTagRepository skillsetTagRepository;
 
     @InjectMocks
@@ -111,7 +114,7 @@ class DemonServiceImplTest {
         assertEquals("https://youtube.com/watch?v=demon", response.getYoutubeUrl());
         assertEquals(1, response.getSkillsetTags().size());
         assertEquals("Timing", response.getSkillsetTags().get(0).getName());
-        verify(leaderboardService).requestRebuild();
+        verify(leaderboardService).requestRebuild(Set.of(existingFirst.getId(), existingSecond.getId()), Set.of());
     }
 
     @Test
@@ -144,7 +147,29 @@ class DemonServiceImplTest {
         assertEquals("https://youtube.com/watch?v=demon", response.getYoutubeUrl());
         assertEquals(1, response.getSkillsetTags().size());
         assertEquals("Nerve Control", response.getSkillsetTags().get(0).getName());
-        verify(leaderboardService).requestRebuild();
+        verify(leaderboardService).requestRebuild(Set.of(first.getId(), second.getId(), target.getId()), Set.of());
+    }
+
+    @Test
+    void movingDemonOnlyRebuildsVictorsOfChangedPositions() {
+        Demon first = demon("First", 111L, 1, 0);
+        Demon target = demon("Target", 222L, 2, 0);
+        Demon third = demon("Third", 333L, 3, 0);
+        Demon fourth = demon("Fourth", 444L, 4, 0);
+        List<Demon> demons = new ArrayList<>(List.of(first, target, third, fourth));
+        demons.forEach(current -> current.recalculatePoints(demons.size()));
+
+        when(demonRepository.findByDeletedAtIsNullAndLevelId(222L)).thenReturn(Optional.of(target));
+        when(demonRepository.findAllByDeletedAtIsNullOrderByPositionAsc()).thenReturn(demons);
+        when(demonRepository.findByDeletedAtIsNullAndLevelIdAndIdNot(222L, target.getId()))
+                .thenReturn(Optional.empty());
+        when(demonRepository.saveAll(anyList())).thenAnswer(invocation -> invocation.getArgument(0));
+
+        demonService.update(222L, demonRequest(222L, "Target", 3, Set.of()));
+
+        verify(leaderboardService).requestRebuild(Set.of(target.getId(), third.getId()), Set.of());
+        assertEquals(1, first.getPosition());
+        assertEquals(4, fourth.getPosition());
     }
 
     @Test
@@ -163,7 +188,7 @@ class DemonServiceImplTest {
         verify(demonRepository).save(toDelete);
         assertTrue(toDelete.getDeletedAt() != null);
         verify(demonRepository).saveAll(anyList());
-        verify(leaderboardService).requestRebuild();
+        verify(leaderboardService).requestRebuild(Set.of(toDelete.getId(), remaining.getId()), Set.of());
     }
 
     @Test
@@ -189,7 +214,7 @@ class DemonServiceImplTest {
         assertEquals(restored.getId(), savedDemons.get(1).getId());
         assertEquals(1, savedDemons.get(0).getPosition());
         assertEquals(2, savedDemons.get(1).getPosition());
-        verify(leaderboardService).requestRebuild();
+        verify(leaderboardService).requestRebuild(Set.of(restored.getId(), remaining.getId()), Set.of());
     }
 
     @Test

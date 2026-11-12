@@ -19,7 +19,7 @@ import java.util.Set;
 @AllArgsConstructor
 @Builder
 @Entity
-@Table(name = "demons")
+@Table(name = "demons", indexes = @Index(name = "idx_demons_list_position", columnList = "deleted_at, position"))
 public class Demon extends BaseEntity {
     private static final double BASE_POINTS = 1.0;
     private static final double TOP_DEMON_POINTS = 323.0;

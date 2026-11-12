@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.*;
+import org.hibernate.annotations.DynamicUpdate;
 
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -16,7 +17,11 @@ import java.util.Set;
 @AllArgsConstructor
 @Builder
 @Entity
-@Table(name = "players")
+@DynamicUpdate
+@Table(name = "players", indexes = {
+        @Index(name = "idx_players_leaderboard_rank", columnList = "deleted_at, rank"),
+        @Index(name = "idx_players_leaderboard_points", columnList = "deleted_at, points")
+})
 public class Player extends BaseEntity {
     @Size(min = 2, message = "Името трябва да е поне 2 символа!")
     private String name;
@@ -34,9 +39,6 @@ public class Player extends BaseEntity {
     @ManyToOne
     @JoinColumn(name = "hardest_demon_id")
     private Demon hardestDemon;
-
-    @OneToOne(mappedBy = "player")
-    private User user;
 
     @Builder.Default
     @ManyToMany

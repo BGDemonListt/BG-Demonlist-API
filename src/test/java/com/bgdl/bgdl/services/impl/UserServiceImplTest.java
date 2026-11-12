@@ -3,6 +3,7 @@ package com.bgdl.bgdl.services.impl;
 import com.bgdl.bgdl.enums.BulgarianRegion;
 import com.bgdl.bgdl.enums.Role;
 import com.bgdl.bgdl.exceptions.common.AccessDeniedException;
+import com.bgdl.bgdl.exceptions.common.BadRequestException;
 import com.bgdl.bgdl.exceptions.user.DiscordAccountAlreadyLinkedException;
 import com.bgdl.bgdl.models.entity.DiscordProfile;
 import com.bgdl.bgdl.models.entity.Player;
@@ -10,6 +11,8 @@ import com.bgdl.bgdl.models.entity.User;
 import com.bgdl.bgdl.models.request.ProfileUpdateRequest;
 import com.bgdl.bgdl.models.response.PublicUserResponse;
 import com.bgdl.bgdl.repositories.UserRepository;
+import com.bgdl.bgdl.repositories.PlayerRepository;
+import com.bgdl.bgdl.repositories.RecordSubmissionRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.modelmapper.ModelMapper;
@@ -39,6 +42,12 @@ class UserServiceImplTest {
 
     @Mock
     private UserRepository userRepository;
+
+    @Mock
+    private PlayerRepository playerRepository;
+
+    @Mock
+    private RecordSubmissionRepository recordSubmissionRepository;
 
     @Mock
     private ModelMapper modelMapper;
@@ -169,5 +178,64 @@ class UserServiceImplTest {
         assertSame(mappedResponse, response);
         assertNull(user.getDiscord());
         verify(userRepository).save(user);
+    }
+
+    @Test
+    void canRequestPlayerClaimOnlyWhenPlayerHasNoActiveSubmissions() {
+        Player player = new Player();
+        player.setId(UUID.randomUUID());
+        User user = new User();
+        user.setPlayer(player);
+
+        when(recordSubmissionRepository.countByDeletedAtIsNullAndHolder_Id(player.getId())).thenReturn(0L);
+        assertEquals(true, userService.canRequestPlayerClaim(user));
+
+        when(recordSubmissionRepository.countByDeletedAtIsNullAndHolder_Id(player.getId())).thenReturn(1L);
+        assertEquals(false, userService.canRequestPlayerClaim(user));
+        verify(recordSubmissionRepository, org.mockito.Mockito.times(2))
+                .countByDeletedAtIsNullAndHolder_Id(player.getId());
+    }
+
+    @Test
+    void userWithoutPlayerCannotRequestPlayerClaim() {
+        assertEquals(false, userService.canRequestPlayerClaim(new User()));
+        verify(recordSubmissionRepository, never()).countByDeletedAtIsNullAndHolder_Id(any());
+    }
+
+    @Test
+    void adminPlayerAssignmentSwapsToUnownedTarget() {
+        UUID userId = UUID.randomUUID();
+        Player previousPlayer = new Player();
+        previousPlayer.setId(UUID.randomUUID());
+        Player targetPlayer = new Player();
+        targetPlayer.setId(UUID.randomUUID());
+        User user = new User();
+        user.setId(userId);
+        user.setPlayer(previousPlayer);
+
+        when(userRepository.findActiveByIdForUpdate(userId)).thenReturn(Optional.of(user));
+        when(playerRepository.findActiveByIdForUpdate(targetPlayer.getId())).thenReturn(Optional.of(targetPlayer));
+        when(userRepository.existsByPlayer_Id(targetPlayer.getId())).thenReturn(false);
+
+        userService.assignPlayerToUser(userId, targetPlayer.getId());
+
+        assertSame(targetPlayer, user.getPlayer());
+        verify(userRepository).save(user);
+    }
+
+    @Test
+    void adminPlayerAssignmentRejectsAlreadyOwnedTarget() {
+        UUID userId = UUID.randomUUID();
+        UUID playerId = UUID.randomUUID();
+        User user = new User();
+        user.setId(userId);
+        Player targetPlayer = new Player();
+        targetPlayer.setId(playerId);
+        when(userRepository.findActiveByIdForUpdate(userId)).thenReturn(Optional.of(user));
+        when(playerRepository.findActiveByIdForUpdate(playerId)).thenReturn(Optional.of(targetPlayer));
+        when(userRepository.existsByPlayer_Id(playerId)).thenReturn(true);
+
+        assertThrows(BadRequestException.class, () -> userService.assignPlayerToUser(userId, playerId));
+        verify(userRepository, never()).save(any(User.class));
     }
 }

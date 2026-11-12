@@ -83,6 +83,14 @@ The application reads its runtime settings from environment variables referenced
 ./mvnw test
 ```
 
+The PostgreSQL leaderboard integration tests use Testcontainers and require a running Docker daemon. The measured 300-reader/20-admin workload is opt-in:
+
+```bash
+./mvnw -Dtest=LeaderboardPostgresIntegrationTest -Dbgdl.runLeaderboardLoadTest=true test
+```
+
+It prints `LEADERBOARD_LOAD` with the initial rebuild time, asynchronous worker-drain time, read p95, and commit-to-visibility lag. These are local service/database timings, not HTTP production latency or fixed performance targets.
+
 The API starts on `http://localhost:8080` by default.
 
 ## API overview

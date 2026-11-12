@@ -11,7 +11,7 @@ CREATE TABLE users (
     enabled BOOLEAN NOT NULL,
     discord_id VARCHAR(255) UNIQUE,
     discord_username VARCHAR(255),
-    discord_avatar_url VARCHAR(512),
+    discord_avatar_url VARCHAR(255),
     discord_linked_at TIMESTAMP,
     player_id UUID UNIQUE,
     CONSTRAINT fk_users_player FOREIGN KEY (player_id) REFERENCES players (id)

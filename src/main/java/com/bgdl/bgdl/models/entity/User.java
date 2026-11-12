@@ -40,7 +40,7 @@ public class User extends BaseEntity implements UserDetails {
     @Embedded
     private DiscordProfile discord;
 
-    @Column(name = "enabled")
+    @Column(name = "enabled", nullable = false)
     private boolean enabled;
 
     @OneToOne

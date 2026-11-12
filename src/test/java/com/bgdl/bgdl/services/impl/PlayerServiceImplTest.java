@@ -26,6 +26,7 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -79,6 +80,26 @@ class PlayerServiceImplTest {
         playerService.createPlayer(user);
 
         verifyNoInteractions(playerRepository, userRepository);
+    }
+
+    @Test
+    void createUnownedPlayerDoesNotCreateOrAttachAUser() {
+        when(playerRepository.save(any(Player.class))).thenAnswer(invocation -> {
+            Player saved = invocation.getArgument(0);
+            saved.setId(UUID.randomUUID());
+            return saved;
+        });
+
+        com.bgdl.bgdl.models.request.PlayerCreateRequest request = new com.bgdl.bgdl.models.request.PlayerCreateRequest();
+        request.setName("  Available Player  ");
+        request.setRegion(BulgarianRegion.VARNA);
+
+        PlayerSummaryResponse response = playerService.createUnownedPlayer(request);
+
+        assertEquals("Available Player", response.getName());
+        assertEquals(0.0, response.getPoints());
+        assertNull(response.getPosition());
+        verify(userRepository, org.mockito.Mockito.never()).save(any(User.class));
     }
 
     @Test

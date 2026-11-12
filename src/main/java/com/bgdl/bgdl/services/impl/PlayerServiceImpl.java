@@ -10,6 +10,7 @@ import com.bgdl.bgdl.models.response.PageResponse;
 import com.bgdl.bgdl.models.response.PlayerDetailsResponse;
 import com.bgdl.bgdl.models.response.PlayerSummaryResponse;
 import com.bgdl.bgdl.models.response.RegionResponse;
+import com.bgdl.bgdl.models.request.PlayerCreateRequest;
 import com.bgdl.bgdl.repositories.PlayerRepository;
 import com.bgdl.bgdl.repositories.UserRepository;
 import com.bgdl.bgdl.services.PlayerService;
@@ -49,6 +50,18 @@ public class PlayerServiceImpl implements PlayerService {
         Player savedPlayer = playerRepository.save(player);
         user.setPlayer(savedPlayer);
         userRepository.save(user);
+    }
+
+    @Override
+    @Transactional
+    public PlayerSummaryResponse createUnownedPlayer(PlayerCreateRequest request) {
+        Player player = Player.builder()
+                .name(request.getName().trim())
+                .region(request.getRegion())
+                .points(0.0)
+                .completedDemons(new LinkedHashSet<>())
+                .build();
+        return toPlayerSummary(playerRepository.save(player));
     }
 
     @Override

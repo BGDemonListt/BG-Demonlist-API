@@ -30,6 +30,7 @@ public class VerificationToken {
     private User user;
 
     private Date expiryDate;
+    @Column(nullable = false)
     private LocalDateTime createdAt;
 
     public VerificationToken(String token, User user) {

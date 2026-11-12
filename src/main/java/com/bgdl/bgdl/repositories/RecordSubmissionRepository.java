@@ -25,6 +25,7 @@ public interface RecordSubmissionRepository extends JpaRepository<RecordSubmissi
     @Query("SELECT r FROM RecordSubmission r WHERE r.id = :id")
     Optional<RecordSubmission> findByIdForUpdate(@Param("id") UUID id);
     Optional<RecordSubmission> findByDeletedAtIsNullAndHolderIdAndDemonId(UUID holderId, UUID demonId);
+    long countByDeletedAtIsNullAndHolder_Id(UUID holderId);
     List<RecordSubmission> findAllByDeletedAtIsNull();
     @EntityGraph(attributePaths = {"holder", "demon"})
     List<RecordSubmission> findAllByDeletedAtIsNullAndStatus(RecordSubmissionStatus status);

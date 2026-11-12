@@ -16,4 +16,5 @@ import java.io.Serializable;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class AuthenticationResponse implements Serializable {
     private PublicUserResponse user;
+    private boolean canRequestPlayerClaim;
 }

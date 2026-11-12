@@ -27,6 +27,7 @@ public class Player extends BaseEntity {
     private String name;
 
     @Enumerated(EnumType.STRING)
+    @Column(length = 64)
     private BulgarianRegion region;
 
     @Builder.Default
@@ -42,6 +43,11 @@ public class Player extends BaseEntity {
 
     @Builder.Default
     @ManyToMany
+    @JoinTable(
+            name = "player_completed_demons",
+            joinColumns = @JoinColumn(name = "player_id"),
+            inverseJoinColumns = @JoinColumn(name = "demon_id")
+    )
     @OrderBy("position ASC")
     private Set<Demon> completedDemons = new LinkedHashSet<>();
 }

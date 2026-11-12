@@ -7,6 +7,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.jpa.repository.Lock;
+import jakarta.persistence.LockModeType;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
@@ -18,6 +20,10 @@ import java.util.UUID;
 @Repository
 public interface PlayerRepository extends JpaRepository<Player, UUID> {
     Optional<Player> findByDeletedAtIsNullAndId(UUID id);
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT p FROM Player p WHERE p.deletedAt IS NULL AND p.id = :id")
+    Optional<Player> findActiveByIdForUpdate(@Param("id") UUID id);
 
     @EntityGraph(attributePaths = {"hardestDemon", "completedDemons"})
     @Query("""

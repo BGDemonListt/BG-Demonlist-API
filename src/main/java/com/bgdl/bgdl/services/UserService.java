@@ -37,4 +37,8 @@ public interface UserService {
     PublicUserResponse linkDiscordAccount(UUID userId, DiscordProfile discordProfile);
 
     PublicUserResponse unlinkDiscordAccount(UUID userId);
+
+    boolean canRequestPlayerClaim(User user);
+
+    void assignPlayerToUser(UUID userId, UUID playerId);
 }

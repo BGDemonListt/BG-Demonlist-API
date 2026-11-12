@@ -20,10 +20,12 @@ public class AuthenticationSession implements Serializable {
     private String accessToken;
     private String refreshToken;
     private PublicUserResponse user;
+    private boolean canRequestPlayerClaim;
 
     public AuthenticationResponse toResponse() {
         return AuthenticationResponse.builder()
                 .user(user)
+                .canRequestPlayerClaim(canRequestPlayerClaim)
                 .build();
     }
 }

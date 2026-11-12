@@ -90,6 +90,7 @@ public class TokenServiceImpl implements TokenService {
                 .accessToken(jwtToken)
                 .refreshToken(refreshToken)
                 .user(publicUser)
+                .canRequestPlayerClaim(userService.canRequestPlayerClaim(user))
                 .build();
     }
 

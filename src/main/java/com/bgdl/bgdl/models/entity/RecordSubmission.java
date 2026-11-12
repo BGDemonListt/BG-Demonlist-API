@@ -35,6 +35,7 @@ public class RecordSubmission extends BaseEntity {
 
     @NotNull
     @NotBlank(message = "Описанието е задължително")
+    @Column(columnDefinition = "text")
     private String description;
 
     @ManyToOne
@@ -44,6 +45,7 @@ public class RecordSubmission extends BaseEntity {
 
     @NotNull
     @Enumerated(EnumType.STRING)
+    @Column(length = 50)
     private RecordSubmissionStatus status;
 
     @ManyToOne

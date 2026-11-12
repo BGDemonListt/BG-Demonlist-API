@@ -3,6 +3,7 @@ package com.bgdl.bgdl.models.entity;
 import com.bgdl.bgdl.enums.ExceptionSeverity;
 import com.bgdl.bgdl.exceptions.common.ApiException;
 import jakarta.persistence.Entity;
+import jakarta.persistence.Column;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.Table;
@@ -21,7 +22,9 @@ import java.util.Arrays;
 public class Exception extends BaseEntity {
     private Integer statusCode;
     private String exceptionType;
+    @Column(columnDefinition = "text")
     private String exceptionMessage;
+    @Column(columnDefinition = "text")
     private String stackTraceString;
     private String methodName;
     private String className;

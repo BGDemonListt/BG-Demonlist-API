@@ -22,6 +22,13 @@ import java.util.UUID;
 public class UserController {
     private final UserService userService;
 
+    @PutMapping("/{id}/player/{playerId}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Void> assignPlayer(@PathVariable UUID id, @PathVariable UUID playerId) {
+        userService.assignPlayerToUser(id, playerId);
+        return ResponseEntity.noContent().build();
+    }
+
     @GetMapping("/all")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<AdminUserResponse>> getAllUsers() {

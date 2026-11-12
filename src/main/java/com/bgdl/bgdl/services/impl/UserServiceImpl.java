@@ -5,6 +5,7 @@ import com.bgdl.bgdl.enums.Provider;
 import com.bgdl.bgdl.enums.Role;
 import com.bgdl.bgdl.exceptions.common.AccessDeniedException;
 import com.bgdl.bgdl.exceptions.common.BadRequestException;
+import com.bgdl.bgdl.exceptions.player.PlayerNotFoundException;
 import com.bgdl.bgdl.exceptions.user.DiscordAccountAlreadyLinkedException;
 import com.bgdl.bgdl.exceptions.user.UserCreateException;
 import com.bgdl.bgdl.exceptions.user.UserNotFoundException;
@@ -18,6 +19,8 @@ import com.bgdl.bgdl.models.response.PublicUserResponse;
 import com.bgdl.bgdl.models.request.auth.RegisterRequest;
 import com.bgdl.bgdl.models.entity.User;
 import com.bgdl.bgdl.repositories.UserRepository;
+import com.bgdl.bgdl.repositories.PlayerRepository;
+import com.bgdl.bgdl.repositories.RecordSubmissionRepository;
 import com.bgdl.bgdl.services.LeaderboardService;
 import com.bgdl.bgdl.services.UserService;
 import jakarta.validation.ConstraintViolationException;
@@ -40,6 +43,8 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final ModelMapper modelMapper;
     private final LeaderboardService leaderboardService;
+    private final PlayerRepository playerRepository;
+    private final RecordSubmissionRepository recordSubmissionRepository;
 
     /**
      * Creates a new user based on the provided registration request.
@@ -257,6 +262,30 @@ public class UserServiceImpl implements UserService {
         PublicUserResponse response = modelMapper.map(user, PublicUserResponse.class);
         response.setPlayerId(user.getPlayer() != null ? user.getPlayer().getId() : null);
         return response;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public boolean canRequestPlayerClaim(User user) {
+        return user.getPlayer() != null
+                && recordSubmissionRepository.countByDeletedAtIsNullAndHolder_Id(user.getPlayer().getId()) == 0;
+    }
+
+    @Override
+    @Transactional
+    public void assignPlayerToUser(UUID userId, UUID playerId) {
+        User user = userRepository.findActiveByIdForUpdate(userId)
+                .orElseThrow(UserNotFoundException::new);
+        Player player = playerRepository.findActiveByIdForUpdate(playerId)
+                .orElseThrow(PlayerNotFoundException::new);
+        if (user.getPlayer() != null && user.getPlayer().getId().equals(playerId)) {
+            return;
+        }
+        if (userRepository.existsByPlayer_Id(playerId)) {
+            throw new BadRequestException("Player is already assigned to a user.");
+        }
+        user.setPlayer(player);
+        userRepository.save(user);
     }
 
     @Override

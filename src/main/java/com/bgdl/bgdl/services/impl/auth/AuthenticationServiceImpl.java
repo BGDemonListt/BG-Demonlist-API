@@ -166,6 +166,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         return AuthenticationResponse
                 .builder()
                 .user(publicUser)
+                .canRequestPlayerClaim(userService.canRequestPlayerClaim(user))
                 .build();
     }
 

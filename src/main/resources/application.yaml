@@ -38,13 +38,12 @@ spring:
       maximum-pool-size: ${DB_POOL_SIZE:30}
       minimum-idle: ${DB_POOL_MIN_IDLE:10}
   flyway:
-    enabled: false
+    enabled: true
     locations: classpath:db/migration
-    baseline-on-migrate: true
   jpa:
     generate-ddl: false
     hibernate:
-      ddl-auto: update
+      ddl-auto: validate
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect

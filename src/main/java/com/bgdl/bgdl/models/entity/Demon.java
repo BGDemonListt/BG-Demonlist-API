@@ -42,6 +42,7 @@ public class Demon extends BaseEntity {
 
     @NotNull
     @NotBlank(message = "Описанието е задължително")
+    @Column(columnDefinition = "text")
     private String description;
 
     @NotNull

@@ -11,6 +11,8 @@
     { "key": "authPassword", "value": "mypassword123" },
     { "key": "userId", "value": "00000000-0000-0000-0000-000000000001" },
     { "key": "playerId", "value": "00000000-0000-0000-0000-000000000002" },
+    { "key": "claimedPlayerId", "value": "00000000-0000-0000-0000-000000000007" },
+    { "key": "claimRequestId", "value": "00000000-0000-0000-0000-000000000008" },
     { "key": "playerRegion", "value": "VARNA" },
     { "key": "filePath", "value": "regions/flags/targovishte.png" },
     { "key": "demonId", "value": "00000000-0000-0000-0000-000000000003" },
@@ -240,6 +242,13 @@
           }
         },
         {
+          "name": "Admin Assign Player To User",
+          "request": {
+            "method": "PUT",
+            "url": "{{baseUrl}}/api/v1/users/{{userId}}/player/{{claimedPlayerId}}"
+          }
+        },
+        {
           "name": "Update Profile",
           "request": {
             "method": "PATCH",
@@ -422,6 +431,66 @@
           "request": {
             "method": "GET",
             "url": "{{baseUrl}}/api/v1/players/{{playerId}}"
+          }
+        },
+        {
+          "name": "Admin Create Unowned Player",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Player Available To Claim\",\n  \"region\": \"{{playerRegion}}\"\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/players"
+          },
+          "event": [{
+            "listen": "test",
+            "script": { "type": "text/javascript", "exec": [
+              "pm.collectionVariables.set('claimedPlayerId', pm.response.json().id);"
+            ] }
+          }]
+        }
+      ]
+    },
+    {
+      "name": "Player Claims",
+      "item": [
+        {
+          "name": "Request Player Claim",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"playerId\": \"{{claimedPlayerId}}\"\n}" },
+            "url": "{{baseUrl}}/api/v1/player-claims"
+          },
+          "event": [{
+            "listen": "test",
+            "script": { "type": "text/javascript", "exec": [
+              "pm.collectionVariables.set('claimRequestId', pm.response.json().id);"
+            ] }
+          }]
+        },
+        {
+          "name": "Admin List Player Claims",
+          "request": { "method": "GET", "url": "{{baseUrl}}/api/v1/player-claims" }
+        },
+        {
+          "name": "Admin Accept Player Claim",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"status\": \"ACCEPTED\"\n}" },
+            "url": "{{baseUrl}}/api/v1/player-claims/{{claimRequestId}}"
+          }
+        },
+        {
+          "name": "Admin Reject Player Claim",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"status\": \"REJECTED\"\n}" },
+            "url": "{{baseUrl}}/api/v1/player-claims/{{claimRequestId}}"
           }
         }
       ]

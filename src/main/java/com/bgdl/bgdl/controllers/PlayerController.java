@@ -5,11 +5,16 @@ import com.bgdl.bgdl.models.response.PageResponse;
 import com.bgdl.bgdl.models.response.PlayerDetailsResponse;
 import com.bgdl.bgdl.models.response.PlayerSummaryResponse;
 import com.bgdl.bgdl.models.response.RegionResponse;
+import com.bgdl.bgdl.models.request.PlayerCreateRequest;
 import com.bgdl.bgdl.services.PlayerService;
 import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -32,6 +37,12 @@ public class PlayerController {
             @RequestParam(required = false) BulgarianRegion region
     ) {
         return ResponseEntity.ok(playerService.getPlayers(name, region, page));
+    }
+
+    @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<PlayerSummaryResponse> createPlayer(@Valid @RequestBody PlayerCreateRequest request) {
+        return ResponseEntity.status(201).body(playerService.createUnownedPlayer(request));
     }
 
     @GetMapping("/regions")
